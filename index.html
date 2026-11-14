@@ -1,4 +1,4 @@
-<!doctype html><html lang="de"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>The 4 Werhans</title>
+<!doctype html><html lang="de"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>The 4 Werhans</title>
 <style>
 :root{color-scheme:light;--ink:#172b39;--muted:#526574;--accent:#174d55;--line:#d6e1e2;--paper:#fff;--canvas:#f2f6f5}
 *{box-sizing:border-box}
@@ -231,7 +231,38 @@ main:has(.profile-picker)>#screen{flex:1;display:flex;flex-direction:column}
 main:has(.profile-picker) .profile-picker{margin:auto auto;flex:none}
 main:has(.profile-picker) .profile-nav{margin:12px 0 0}
 main:has(.profile-picker) .app-version{margin-top:6px}
-</style><main><header><h1>The 4 Werhans</h1></header><section id="screen"></section><footer class="app-version"><small>V35 · Daten auf diesem Gerät</small></footer><button class="new" id="add">＋ Neu</button></main>
+@media(display-mode:standalone){
+  main{padding-top:calc(20px + env(safe-area-inset-top,0px))}
+  main:has(.profile-picker){padding-top:calc(20px + env(safe-area-inset-top,0px))}
+}
+.shift-menu{margin:8px 0 12px}
+.shift-menu summary{width:fit-content;padding:10px 0;cursor:pointer;font-weight:650}
+@media(max-width:699px) and (orientation:portrait) and (min-height:540px){
+  main:has(.calendar-view){height:100dvh;padding-top:calc(4px + env(safe-area-inset-top,0px));padding-bottom:calc(68px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column}
+  main:has(.calendar-view)>header{display:none}
+  main:has(.calendar-view)>#screen,.calendar-view{display:flex;flex-direction:column;flex:1;min-height:0}
+  #screen:has(.calendar-view)>.back{align-self:flex-start;margin:0;flex:none}
+  .calendar-header{gap:6px;margin-bottom:4px}
+  .calendar-header h2{font-size:clamp(1.2rem,5.5vw,1.65rem)}
+  .shift-menu{margin:0 0 4px}
+  .shift-menu summary{padding:4px 0}
+  .calendar-view>[role="status"]{font-size:.78rem}
+  .month-toolbar{padding:3px 6px;gap:4px}
+  .weekday{padding:3px 0}
+  .month-day,.month-blank{min-height:clamp(28px,4.7dvh,44px)}
+  .day-number{width:23px;height:23px}
+  .day-dots{min-height:4px}
+  .day-dots i{width:4px;height:4px}
+  .day-agenda{margin-top:6px;min-height:0;flex:1;overflow:auto}
+  .day-agenda h3{font-size:.95rem;margin-bottom:4px}
+  .day-agenda .task-group{margin-bottom:0}
+  main:has(.calendar-view) .app-version{margin-top:3px}
+  .calendar-view:has(.shift-menu[open]){overflow:auto}
+}
+.calendar-legend{display:flex;gap:4px 12px;flex-wrap:wrap}
+.family-key::before,.day-dots i{background:var(--event-color,var(--family-color))}
+.event-line{border-inline-start-color:var(--event-color,var(--family-color))}
+</style><main><header><h1>The 4 Werhans</h1></header><section id="screen"></section><footer class="app-version"><small>V39 · Lokale Daten und Kalenderabgleich</small></footer><button class="new" id="add">＋ Neu</button></main>
 <dialog id="editor"><form id="form"><h2 id="editorTitle">Neuer Eintrag</h2><label id="kindLabel">Art<select id="kind"><option>Aufgabe</option><option>Termin</option></select></label><label>Titel<input id="titleInput" required maxlength="120"></label><label id="whoLabel">Für wen?<select id="who"></select></label><label class="date-field"><span id="dayCaption">Fällig am (optional)</span><input type="date" id="day"></label><fieldset id="attendeeField" hidden><legend>Wer nimmt an diesem Termin teil?</legend><div id="attendeeChoices"></div></fieldset><fieldset id="timeLabel" hidden><legend>Uhrzeit (optional)</legend>
 <input type="text" id="clock" inputmode="numeric" maxlength="5" placeholder="z. B. 0930" aria-label="Uhrzeit in Stunden und Minuten" autocomplete="off">
 <div class="minute-buttons" aria-label="Minuten auswählen">
@@ -239,7 +270,7 @@ main:has(.profile-picker) .app-version{margin-top:6px}
 </div></fieldset>
 <section id="reminderField" hidden>
 <label>Erinnerung<select id="reminder"><option value="">Keine</option><option value="5">5 Minuten vorher</option><option value="15">15 Minuten vorher</option><option value="30">30 Minuten vorher</option><option value="60">1 Stunde vorher</option><option value="120">2 Stunden vorher</option><option value="1440">1 Tag vorher</option><option value="2880">2 Tage vorher</option><option value="custom">Eigene Vorlaufzeit</option></select></label>
-<div id="customReminder" hidden><label>Vorlauf<input id="reminderAmount" type="number" min="1" max="99999" step="1" inputmode="numeric" value="1"></label><label>Einheit<select id="reminderUnit"><option value="1">Minuten</option><option value="60">Stunden</option><option value="1440">Tage</option></select></label></div>
+<label id="calendarScopeLabel">Kalender<select id="calendarScope"><option value="private">Privat</option><option value="family">Family</option><option value="couple">Matze &amp; Sindy</option></select><small>Selbst angelegte Termine liegen derzeit auf diesem Gerät.</small></label><div id="customReminder" hidden><label>Vorlauf<input id="reminderAmount" type="number" min="1" max="99999" step="1" inputmode="numeric" value="1"></label><label>Einheit<select id="reminderUnit"><option value="1">Minuten</option><option value="60">Stunden</option><option value="1440">Tage</option></select></label></div>
 <small>Die Einstellung wird gespeichert. Push ist noch nicht aktiv.</small>
 </section><div class="bar"><button type="button" id="cancel">Abbrechen</button><button class="primary">Speichern</button></div></form></dialog>
 <button id="frame" hidden aria-label="Zur Profilauswahl"><img id="slide" alt=""></button>
@@ -258,6 +289,7 @@ function node(tag,txt,parent=screen){const n=document.createElement(tag);if(txt)
 function button(txt,fn,parent=screen){const b=node('button',txt,parent);b.onclick=fn;return b}
 function go(next){
   view=next;taskPage=0;render();reset();
+  if(next==='calendar')refreshShared();
   if(next==='calendar'&&dayforceKey)refreshDayforce(dayforceKey);
 }
 function avatar(name,parent){
@@ -386,10 +418,10 @@ function render(){
   button('‹ Zur Profilauswahl',()=>go('home')).className='back';
   const area=node('section');
   if(view==='settings'){area.className='settings';
-  node('h2','Einstellungen',area);const profiles=node('section','',area);node('h3','Profilbilder',profiles);for(const name of names){const l=node('label',name,profiles);const f=node('input','',l);f.type='file';f.accept='image/*';f.onchange=async()=>{if(!f.files[0])return;try{state.avatars[name]=await resize(f.files[0],240);save()}catch{alert('Dieses Foto konnte nicht gespeichert werden.')}}}const slides=node('section','',area);node('h3','Bilderrahmen',slides);const label=node('label','Fotos für den Bilderrahmen (bis zu 100)',slides);const upload=node('input','',label);upload.type='file';upload.accept='image/*';upload.multiple=true;const count=node('small',photos.length+' Fotos · für diese Sitzung',slides);upload.onchange=()=>{if(!upload.files.length)return;photos.forEach(URL.revokeObjectURL);photos=Array.from(upload.files).slice(0,100).map(f=>URL.createObjectURL(f));count.textContent=photos.length+' Fotos · für diese Sitzung';reset()};
+  node('h2','Einstellungen',area);renderSyncSettings(area);const profiles=node('section','',area);node('h3','Profilbilder',profiles);for(const name of names){const l=node('label',name,profiles);const f=node('input','',l);f.type='file';f.accept='image/*';f.onchange=async()=>{if(!f.files[0])return;try{state.avatars[name]=await resize(f.files[0],240);save()}catch{alert('Dieses Foto konnte nicht gespeichert werden.')}}}const slides=node('section','',area);node('h3','Bilderrahmen',slides);const label=node('label','Fotos für den Bilderrahmen (bis zu 100)',slides);const upload=node('input','',label);upload.type='file';upload.accept='image/*';upload.multiple=true;const count=node('small',photos.length+' Fotos · für diese Sitzung',slides);upload.onchange=()=>{if(!upload.files.length)return;photos.forEach(URL.revokeObjectURL);photos=Array.from(upload.files).slice(0,100).map(f=>URL.createObjectURL(f));count.textContent=photos.length+' Fotos · für diese Sitzung';reset()};
 for(const [key,label] of [['wait','Start nach Sekunden (0 = aus)'],['interval','Bildwechsel nach Sekunden']]){const l=node('label',label,slides),i=node('input','',l);i.type='number';i.min=key==='wait'?0:1;i.value=state[key];i.onchange=()=>{if(i.value!==''&&i.checkValidity()){state[key]=Number(i.value);save();reset()}else i.value=state[key]}}button('Diashow testen',()=>photos.length?showFrame():alert('Wähle zuerst Fotos aus.'),slides);return}
 
-  if(view==='calendar'){renderCalendar(area);return}
+  if(view==='calendar'){area.className='calendar-view';renderCalendar(area);return}
   if(view==='shopping'){renderShopping(area);return}
   const head=node('div','',area);head.className='list-head';
   node('h2',view==='all'?'Alle Aufgaben':view+' · Aufgaben',head);
@@ -639,7 +671,11 @@ function clearDayforceAccess(){
 }
 
 function renderDayforce(area){
-  const form=node('form','',area);
+  const menu=node('details','',area);
+  menu.className='shift-menu';
+  menu.open=!dayforceKey;
+  node('summary','Sindys Schichten',menu);
+  const form=node('form','',menu);
   form.className='bar';
   form.style.marginBlock='12px';
   let keyInput;
@@ -670,6 +706,89 @@ function renderDayforce(area){
   node('p',dayforceStatus,area).setAttribute('role','status');
 }
 
+const calendarTypes={
+  private:{label:'Privat',color:'#284bb0'},
+  family:{label:'Family',color:'var(--family-color)'},
+  couple:{label:'Matze & Sindy',color:'#27804d'}
+};
+function calendarType(item){
+  return item.dayforce?calendarTypes.family:(calendarTypes[item.calendarScope]||calendarTypes.private);
+}
+const syncScopes=['family','couple'];
+const syncKey=scope=>'werhans-events-'+scope;
+const syncTokens=Object.fromEntries(syncScopes.map(scope=>[scope,localStorage.getItem(syncKey(scope))||'']));
+const sharedItems={family:[],couple:[]};
+let syncStatus='';
+async function sharedRequest(scope,method='GET',id='',data){
+  const token=syncTokens[scope];
+  if(!token)throw new Error('Aktiviere zuerst den Zugang unter Einstellungen → Kalendersynchronisation.');
+  const response=await fetch('https://werhans-kalender.mathiaswerhan.workers.dev/events/'+scope+(id?'/'+id:''),{
+    method,headers:{Authorization:'Bearer '+token,...(data?{'Content-Type':'application/json'}:{})},
+    body:data?JSON.stringify(data):undefined,signal:AbortSignal.timeout(10000)
+  });
+  const result=await response.json();
+  if(!response.ok)throw new Error(result.error||'Kalenderanfrage fehlgeschlagen.');
+  return result;
+}
+let refreshGeneration=0;
+async function refreshShared(){
+  const generation=++refreshGeneration;
+  const results=await Promise.allSettled(syncScopes.map(async scope=>{
+    const result=syncTokens[scope]?await sharedRequest(scope):{events:[]};
+    return result.events.map(item=>({...item,calendarScope:scope}));
+  }));
+  if(generation!==refreshGeneration)return;
+  const previous=JSON.stringify([syncStatus,sharedItems]);
+  syncStatus='';
+  results.forEach((result,index)=>{
+    const scope=syncScopes[index];
+    if(result.status==='fulfilled')sharedItems[scope]=result.value;
+    else{
+      sharedItems[scope]=[];
+      syncStatus+=' '+calendarTypes[scope].label+' konnte nicht geladen werden.';
+    }
+  });
+  if(view==='calendar'&&!editor.open&&previous!==JSON.stringify([syncStatus,sharedItems]))render();
+}
+function renderSyncSettings(area){
+  const settings=node('section','',area);
+  node('h3','Kalendersynchronisation',settings);
+  for(const scope of syncScopes){
+    const label=node('label',calendarTypes[scope].label,settings);
+    const input=node('input','',label);
+    input.type='password';
+    input.autocomplete='off';
+    const status=node('p',syncTokens[scope]?'Auf diesem Gerät aktiviert.':'Auf diesem Gerät deaktiviert.',settings);
+    status.setAttribute('role','status');
+    const connect=button('Zugang prüfen und speichern',async()=>{
+      const token=input.value.trim();
+      if(!token)return;
+      connect.disabled=pause.disabled=true;
+      const previous=syncTokens[scope];
+      syncTokens[scope]=token;
+      try{
+        await sharedRequest(scope);
+        localStorage.setItem(syncKey(scope),token);
+        input.value='';
+        status.textContent='Auf diesem Gerät aktiviert.';
+      }catch(error){
+        syncTokens[scope]=previous;
+        status.textContent=error.message;
+      }finally{
+        connect.disabled=pause.disabled=false;
+        refreshShared();
+      }
+    },settings);
+    const pause=button('Auf diesem Gerät deaktivieren',()=>{
+      localStorage.removeItem(syncKey(scope));
+      syncTokens[scope]='';
+      sharedItems[scope]=[];
+      status.textContent='Auf diesem Gerät deaktiviert.';
+      refreshShared();
+    },settings);
+  }
+}
+
 function renderCalendar(area){
   const today=localDay(new Date());
   selectedDay ||= today;
@@ -679,13 +798,19 @@ function renderCalendar(area){
   const head=node('div','',area);head.className='calendar-header';
   const heading=node('div','',head);
   node('h2','Familienkalender',heading);
-  node('span','Family',heading).className='family-key';
+  const legend=node('div','',heading);legend.className='calendar-legend';
+  for(const type of Object.values(calendarTypes)){
+    const label=node('span',type.label,legend);
+    label.className='family-key';
+    label.style.setProperty('--event-color',type.color);
+  }
   const modes=node('div','',head);modes.className='calendar-modes';
   for(const mode of ['Woche','Monat']){
     const tab=button(mode,()=>{calendarMode=mode;render();screen.querySelector('.calendar-modes [aria-pressed="true"]').focus({preventScroll:true})},modes);
     tab.setAttribute('aria-pressed',String(mode===calendarMode));
   }
   renderDayforce(area);
+  if(syncStatus)node('p',syncStatus,area).setAttribute('role','status');
   const weekly=calendarMode==='Woche';
   const monday=new Date(year,month-1,day);
   monday.setDate(day-(monday.getDay()+6)%7);
@@ -711,7 +836,7 @@ function renderCalendar(area){
   button('Heute',()=>{selectedDay=today;render()},controls);
   button('›',()=>movePeriod(1),controls).setAttribute('aria-label',weekly?'Nächste Woche':'Nächster Monat');
   const byDay=new Map();
-  for(const item of [...state.items,...dayforceShifts]){
+  for(const item of [...state.items,...dayforceShifts,...sharedItems.family,...sharedItems.couple]){
     if(item.kind!=='Termin'||!item.day)continue;
     if(!byDay.has(item.day))byDay.set(item.day,[]);
     byDay.get(item.day).push(item);
@@ -739,7 +864,7 @@ function renderCalendar(area){
     if(key===today)pick.setAttribute('aria-current','date');
     node('span',String(date.getDate()),pick).className='day-number';
     const dots=node('span','',pick);dots.className='day-dots';dots.setAttribute('aria-hidden','true');
-    for(let index=0;index<Math.min(4,count);index++)node('i','',dots);
+    for(const item of (byDay.get(key)||[]).slice(0,4))node('i','',dots).style.setProperty('--event-color',calendarType(item).color);
   }
   const agenda=node('section','',area);agenda.className='day-agenda';
   node('h3',(selectedDay===today?'Heute · ':'')+dateLabel(selectedDay),agenda);
@@ -749,9 +874,11 @@ function renderCalendar(area){
   for(const item of events){
     const entry=item.dayforce?node('div','',list):button('',()=>openEditor(item),list);
     entry.className='entry event-line';
+    entry.style.setProperty('--event-color',calendarType(item).color);
     node('span',item.clock||'Ganztägig',entry).className='event-time';
     const copy=node('span','',entry);copy.className='event-copy';
     node('strong',item.title,copy);
+    node('small',calendarType(item).label+(syncScopes.includes(item.calendarScope)&&!item.revision?' · Nur auf diesem Gerät':''),copy).style.display='block';
     if(item.dayforce)node('small','Bis '+(item.endDay===item.day?'':dateLabel(item.endDay)+' · ')+item.endClock+' · Dayforce',copy).style.display='block';
     if(item.reminderMinutes)node('small','Erinnerung: '+reminderText(item.reminderMinutes),copy).style.display='block';
     const participants=names.filter(name=>item.participants?.includes(name));
@@ -812,6 +939,7 @@ function reminderFields(){
 }
 reminder.onchange=reminderFields;
 function fields(){
+  el('calendarScopeLabel').hidden=el('kind').value!=='Termin';
   reminderFields();
   const event=el('kind').value==='Termin';
   el('whoLabel').hidden=event;
@@ -849,13 +977,20 @@ function openEditor(item=null){
     node('span',name,choice);
     choice.setAttribute('aria-pressed',String(item?Boolean(item.participants?.includes(name)):view===name));
   }
+  el('calendarScope').value=item?.calendarScope||'private';
+  el('calendarScope').disabled=Boolean(item?.revision);
   fields();
   editor.showModal();
 }
 el('add').onclick=()=>openEditor();
 el('cancel').onclick=()=>editor.close();
 editor.onclose=reset;
-el('form').onsubmit=event=>{
+editor.addEventListener('cancel',event=>{
+  if(el('cancel').disabled)event.preventDefault();
+});
+window.addEventListener('focus',()=>{if(view==='calendar')refreshShared()});
+setInterval(()=>{if(view==='calendar'&&!document.hidden&&!editor.open)refreshShared()},30000);
+el('form').onsubmit=async event=>{
   event.preventDefault();
   const title=el('titleInput').value.trim();
   if(!title)return;
@@ -870,8 +1005,31 @@ el('form').onsubmit=event=>{
   if(kind==='Termin'){
     const participants=names.filter(name=>participantButtons.get(name).getAttribute('aria-pressed')==='true');
     const reminderMinutes=reminder.value==='custom'?Number(reminderAmount.value)*Number(reminderUnit.value):Number(reminder.value);
-    const details={title,day,clock:time,participants,reminderMinutes};
-    if(editingEvent)Object.assign(editingEvent,details);
+    const details={title,day,clock:time,participants,reminderMinutes,calendarScope:el('calendarScope').value};
+    if(syncScopes.includes(details.calendarScope)){
+      if(editingEvent&&!editingEvent.revision&&!confirm('Diesen bisherigen Termin für '+calendarTypes[details.calendarScope].label+' freigeben?'))return;
+      const form=el('form');
+      const submit=form.querySelector('.primary');
+      if(submit.disabled)return;
+      const item=editingEvent;
+      const id=item?.revision?item.id:crypto.randomUUID();
+      submit.disabled=el('cancel').disabled=true;
+      try{
+        const result=await sharedRequest(details.calendarScope,'PUT',id,{...details,revision:item?.revision||0});
+        if(item&&!item.revision){
+          state.items=state.items.filter(entry=>entry!==item);
+          save();
+        }
+        const entries=sharedItems[details.calendarScope];
+        sharedItems[details.calendarScope]=[...entries.filter(entry=>entry.id!==id),
+          {...details,id,kind,revision:result.revision}];
+      }catch(error){
+        alert(error.message);
+        return;
+      }finally{
+        submit.disabled=el('cancel').disabled=false;
+      }
+    }else if(editingEvent)Object.assign(editingEvent,details);
     else state.items.push({id:Date.now(),kind,...details});
     selectedDay=day;
   }else{

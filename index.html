@@ -215,14 +215,23 @@ main:has(.profile-picker)>header{display:none}
 main:has(.fitted-tasks) .app-version{margin-top:4px}
 
 .profile-picker .profile>.shopping-count{
-  position:absolute;top:0;left:calc(50% + var(--hub-size) * .34);
+  position:absolute;top:calc(var(--hub-size) * .15);left:calc(50% + var(--hub-size) * .35);
+  transform:translate(-50%,-50%);
   min-width:1.5rem;height:1.5rem;padding:0 .28rem;
   display:grid;place-items:center;border-radius:999px;
   border:2px solid white;background:#174b3c;color:white;
   font-size:.75rem;font-weight:750;line-height:1;
   pointer-events:none;
 }
-</style><main><header><h1>The 4 Werhans</h1></header><section id="screen"></section><footer class="app-version"><small>V30 · Daten auf diesem Gerät</small></footer><button class="new" id="add">＋ Neu</button></main>
+main:has(.profile-picker){
+  min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;
+  padding-bottom:calc(max(18px,env(safe-area-inset-bottom)) + 56px);
+}
+main:has(.profile-picker)>#screen{flex:1;display:flex;flex-direction:column}
+main:has(.profile-picker) .profile-picker{margin:auto auto;flex:none}
+main:has(.profile-picker) .profile-nav{margin:12px 0 0}
+main:has(.profile-picker) .app-version{margin-top:6px}
+</style><main><header><h1>The 4 Werhans</h1></header><section id="screen"></section><footer class="app-version"><small>V35 · Daten auf diesem Gerät</small></footer><button class="new" id="add">＋ Neu</button></main>
 <dialog id="editor"><form id="form"><h2 id="editorTitle">Neuer Eintrag</h2><label id="kindLabel">Art<select id="kind"><option>Aufgabe</option><option>Termin</option></select></label><label>Titel<input id="titleInput" required maxlength="120"></label><label id="whoLabel">Für wen?<select id="who"></select></label><label class="date-field"><span id="dayCaption">Fällig am (optional)</span><input type="date" id="day"></label><fieldset id="attendeeField" hidden><legend>Wer nimmt an diesem Termin teil?</legend><div id="attendeeChoices"></div></fieldset><fieldset id="timeLabel" hidden><legend>Uhrzeit (optional)</legend>
 <input type="text" id="clock" inputmode="numeric" maxlength="5" placeholder="z. B. 0930" aria-label="Uhrzeit in Stunden und Minuten" autocomplete="off">
 <div class="minute-buttons" aria-label="Minuten auswählen">
@@ -345,7 +354,7 @@ function render(){
       }
     },true);
     for(const [index,name] of names.entries()){
-      const b=circle(()=>go(name),index);
+      const b=circle(()=>go(name),name==='Robin'?5:index);
       avatar(name,b);
       node('strong',name,b);
       const count=state.items.filter(x=>x.who===name&&x.status!=='Erledigt').length;
@@ -353,7 +362,7 @@ function render(){
     }
     for(const [index,label,target,icon,color] of [
       [4,'Einkaufsliste','shopping','basket','#b4ebe0'],
-      [5,'Kalender','calendar','calendar','#dcd5ff']
+      [3,'Kalender','calendar','calendar','#dcd5ff']
     ]){
       const b=circle(()=>go(target),index);
       const badge=node('span','',b);
@@ -364,10 +373,8 @@ function render(){
       node('strong',label,b);
       if(target==='shopping'){
         const count=(state.shopping||[]).filter(item=>!item.done).length;
-        if(count){
-          node('span',String(count),b).className='shopping-count';
-          b.setAttribute('aria-label',label+', '+count+(count===1?' offener Artikel':' offene Artikel'));
-        }
+        node('span',String(count),b).className='shopping-count';
+        b.setAttribute('aria-label',label+', '+count+(count===1?' offener Artikel':' offene Artikel'));
       }
     }
     const nav=node('nav');
@@ -435,7 +442,7 @@ function groceryKey(title){
 }
 const groceryIcons={
   'cornflakes':'<path fill="#f5c04f" d="M13 9h30l8 6v43H13Z"/><path fill="#df912f" d="m43 9 8 6v43h-8Z"/><path fill="#fff7db" d="M13 20h30v29H13Z"/><path fill="#76a9cc" d="M18 36h20q-2 10-10 10t-10-10Z"/><g fill="#e7aa35" stroke-width="1.3"><ellipse cx="22" cy="33" rx="3" ry="2"/><ellipse cx="28" cy="30" rx="3" ry="2"/><ellipse cx="34" cy="33" rx="3" ry="2"/></g><path d="M20 14h17"/>',
-  'milch':'<path fill="#f9fcff" d="M12 18 23 6h17l12 12v39H12z"/><path d="M12 18h29l11 0M41 18v39M23 6l18 12"/><path fill="#8ec5ef" d="M12 31h29v17H12z"/><path fill="#fff" d="M27 34q-12 12 0 12 11 0 0-12Z"/>',
+  'milch':'<g stroke="none"><ellipse cx="32" cy="58" rx="22" ry="3" fill="#193960" opacity=".14"/><path fill="#245eb5" d="M41 22l12-5v34q0 3-3 4l-9 4z"/><path fill="#397fd4" d="M11 20h32v34q0 5-5 5H16q-5 0-5-5z"/><path fill="#82baf2" d="M11 20l11-12h21l10 9-10 6H11z"/><path fill="#edf6ff" d="M13 28h28v21H13z"/><path fill="#fff" d="M24 8V6q0-2 2-2h9q2 0 2 2v7q-7 3-13 0z"/><path d="M27 8v4m4-4v4m3-4v4" stroke="#b7cde5" stroke-width="1"/><path fill="#2360af" d="M27 30c-2 4-7 8-7 12a7 7 0 0 0 14 0c0-4-5-8-7-12z"/><path d="M23 42q0 3 3 4" fill="none" stroke="#cfe9ff" stroke-width="1.5"/></g>',
   'saft':'<path fill="#f4a53a" d="M26 9h12v12l6 7v27H20V28l6-7Z"/><path fill="#faf2d3" d="M24 6h16v8H24zM20 33h24v15H20z"/><circle cx="32" cy="40" r="5" fill="#f5a837"/>',
   'limonade':bottlePack('#eedb6f'),
   'apfelschorle':bottlePack('#9fc872'),
@@ -614,7 +621,7 @@ async function refreshDayforce(key){
     dayforceKey=key;
     let remembered=true;
     try { localStorage.setItem(dayforceStorageKey,key); } catch { remembered=false; }
-    dayforceShifts=data.shifts.map(shift=>({...shift,kind:'Termin',title:'Sindy · Schicht',dayforce:true}));
+    dayforceShifts=data.shifts.map(shift=>({...shift,kind:'Termin',title:'Sindy · Lidl',dayforce:true}));
     dayforceStatus=data.shifts.length+' Schichten geladen.'+(data.skipped?' Übersprungen: '+data.skipped+'.':'')+
       (remembered?'':' Der Schlüssel konnte auf diesem Gerät nicht gespeichert werden.');
   } catch(error) {

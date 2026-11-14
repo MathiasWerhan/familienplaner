@@ -58,7 +58,11 @@ input::-webkit-date-and-time-value{text-align:left;margin:0}
 .month-day[aria-pressed="true"] .day-number{color:white;background:var(--accent)}
 .day-dots{display:flex;gap:3px;align-items:center;min-height:6px}
 .day-dots i{width:6px;height:6px;background:var(--family-color);border-radius:50%}
-.day-agenda{margin-top:20px}.day-agenda h3{margin-bottom:8px;font-size:1.15rem}
+#dayDialog{width:min(calc(100% - 24px),600px);max-height:calc(100dvh - 24px - env(safe-area-inset-top) - env(safe-area-inset-bottom));overflow:hidden}
+#dayDialog[open]{display:flex;flex-direction:column;gap:12px}
+.day-dialog-header{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.day-dialog-header h2{font-size:1.15rem;margin:0}
+#dayEvents{min-height:0;overflow:auto;overscroll-behavior:contain;margin:0}
 .event-line{justify-content:flex-start;flex-wrap:nowrap;border-inline-start:5px solid var(--family-color)}
 .event-line .event-time{min-width:5.4em;color:var(--accent);font-variant-numeric:tabular-nums;font-size:.88rem}
 .event-line h4{margin:0;min-width:0;overflow-wrap:anywhere;font-size:1rem}
@@ -253,16 +257,19 @@ main:has(.profile-picker) .app-version{margin-top:6px}
   .day-number{width:23px;height:23px}
   .day-dots{min-height:4px}
   .day-dots i{width:4px;height:4px}
-  .day-agenda{margin-top:6px;min-height:0;flex:1;overflow:auto}
-  .day-agenda h3{font-size:.95rem;margin-bottom:4px}
-  .day-agenda .task-group{margin-bottom:0}
   main:has(.calendar-view) .app-version{margin-top:3px}
   .calendar-view:has(.shift-menu[open]){overflow:auto}
 }
 .calendar-legend{display:flex;gap:4px 12px;flex-wrap:wrap}
 .family-key::before,.day-dots i{background:var(--event-color,var(--family-color))}
 .event-line{border-inline-start-color:var(--event-color,var(--family-color))}
-</style><main><header><h1>The 4 Werhans</h1></header><section id="screen"></section><footer class="app-version"><small>V39 · Lokale Daten und Kalenderabgleich</small></footer><button class="new" id="add">＋ Neu</button></main>
+.shopping-item{display:grid;gap:4px;min-width:0}.shopping-item>button:last-child{font-size:.72rem;padding:4px 6px;min-height:32px}.settings input[type=checkbox]{width:24px;min-height:24px}
+</style><main><header><h1>The 4 Werhans</h1></header><section id="screen"></section><footer class="app-version"><small>V41 · Lokale Daten und Kalenderabgleich</small></footer><button class="new" id="add">＋ Neu</button></main>
+<dialog id="dayDialog" aria-labelledby="dayTitle">
+<div class="day-dialog-header"><h2 id="dayTitle"></h2><button type="button" id="closeDay" autofocus>Schließen</button></div>
+<div id="dayEvents" class="task-group"></div>
+<div><button type="button" id="newDayEvent" class="primary">+ Neuer Termin</button></div>
+</dialog>
 <dialog id="editor"><form id="form"><h2 id="editorTitle">Neuer Eintrag</h2><label id="kindLabel">Art<select id="kind"><option>Aufgabe</option><option>Termin</option></select></label><label>Titel<input id="titleInput" required maxlength="120"></label><label id="whoLabel">Für wen?<select id="who"></select></label><label class="date-field"><span id="dayCaption">Fällig am (optional)</span><input type="date" id="day"></label><fieldset id="attendeeField" hidden><legend>Wer nimmt an diesem Termin teil?</legend><div id="attendeeChoices"></div></fieldset><fieldset id="timeLabel" hidden><legend>Uhrzeit (optional)</legend>
 <input type="text" id="clock" inputmode="numeric" maxlength="5" placeholder="z. B. 0930" aria-label="Uhrzeit in Stunden und Minuten" autocomplete="off">
 <div class="minute-buttons" aria-label="Minuten auswählen">
@@ -289,6 +296,7 @@ function node(tag,txt,parent=screen){const n=document.createElement(tag);if(txt)
 function button(txt,fn,parent=screen){const b=node('button',txt,parent);b.onclick=fn;return b}
 function go(next){
   view=next;taskPage=0;render();reset();
+  if(next==='home'||next==='shopping')refreshShopping();
   if(next==='calendar')refreshShared();
   if(next==='calendar'&&dayforceKey)refreshDayforce(dayforceKey);
 }
@@ -404,7 +412,7 @@ function render(){
       badge.setAttribute('aria-hidden','true');
       node('strong',label,b);
       if(target==='shopping'){
-        const count=(state.shopping||[]).filter(item=>!item.done).length;
+        const count=displayedShopping().filter(item=>!item.done).length;
         node('span',String(count),b).className='shopping-count';
         b.setAttribute('aria-label',label+', '+count+(count===1?' offener Artikel':' offene Artikel'));
       }
@@ -418,7 +426,7 @@ function render(){
   button('‹ Zur Profilauswahl',()=>go('home')).className='back';
   const area=node('section');
   if(view==='settings'){area.className='settings';
-  node('h2','Einstellungen',area);renderSyncSettings(area);const profiles=node('section','',area);node('h3','Profilbilder',profiles);for(const name of names){const l=node('label',name,profiles);const f=node('input','',l);f.type='file';f.accept='image/*';f.onchange=async()=>{if(!f.files[0])return;try{state.avatars[name]=await resize(f.files[0],240);save()}catch{alert('Dieses Foto konnte nicht gespeichert werden.')}}}const slides=node('section','',area);node('h3','Bilderrahmen',slides);const label=node('label','Fotos für den Bilderrahmen (bis zu 100)',slides);const upload=node('input','',label);upload.type='file';upload.accept='image/*';upload.multiple=true;const count=node('small',photos.length+' Fotos · für diese Sitzung',slides);upload.onchange=()=>{if(!upload.files.length)return;photos.forEach(URL.revokeObjectURL);photos=Array.from(upload.files).slice(0,100).map(f=>URL.createObjectURL(f));count.textContent=photos.length+' Fotos · für diese Sitzung';reset()};
+  node('h2','Einstellungen',area);renderSyncSettings(area);renderShoppingSettings(area);const profiles=node('section','',area);node('h3','Profilbilder',profiles);for(const name of names){const l=node('label',name,profiles);const f=node('input','',l);f.type='file';f.accept='image/*';f.onchange=async()=>{if(!f.files[0])return;try{state.avatars[name]=await resize(f.files[0],240);save()}catch{alert('Dieses Foto konnte nicht gespeichert werden.')}}}const slides=node('section','',area);node('h3','Bilderrahmen',slides);const label=node('label','Fotos für den Bilderrahmen (bis zu 100)',slides);const upload=node('input','',label);upload.type='file';upload.accept='image/*';upload.multiple=true;const count=node('small',photos.length+' Fotos · für diese Sitzung',slides);upload.onchange=()=>{if(!upload.files.length)return;photos.forEach(URL.revokeObjectURL);photos=Array.from(upload.files).slice(0,100).map(f=>URL.createObjectURL(f));count.textContent=photos.length+' Fotos · für diese Sitzung';reset()};
 for(const [key,label] of [['wait','Start nach Sekunden (0 = aus)'],['interval','Bildwechsel nach Sekunden']]){const l=node('label',label,slides),i=node('input','',l);i.type='number';i.min=key==='wait'?0:1;i.value=state[key];i.onchange=()=>{if(i.value!==''&&i.checkValidity()){state[key]=Number(i.value);save();reset()}else i.value=state[key]}}button('Diashow testen',()=>photos.length?showFrame():alert('Wähle zuerst Fotos aus.'),slides);return}
 
   if(view==='calendar'){area.className='calendar-view';renderCalendar(area);return}
@@ -522,9 +530,145 @@ function renderProductIcon(item,tile){
   if(drawing)icon.innerHTML='<svg viewBox="0 0 64 64" fill="#faf0d4" stroke="#29394b" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" focusable="false">'+drawing+'</svg>';
   else icon.textContent=item.icon;
 }
+const shoppingEnabledKey='werhans-shopping-sync';
+const shoppingDeviceKey='werhans-shopping-device';
+let sharedShopping=[];
+let shoppingPublicKey='';
+let shoppingBusy=false;
+let shoppingReadVersion=0;
+let shoppingUpdateList=null;
+let pushRegistration=null;
+let shoppingNotice='';
+const shoppingEnabled=()=>localStorage.getItem(shoppingEnabledKey)==='1';
+const displayedShopping=()=>shoppingEnabled()?sharedShopping:(state.shopping||[]);
+function shoppingDevice(){
+  let id=localStorage.getItem(shoppingDeviceKey);
+  if(!id){id=crypto.randomUUID();localStorage.setItem(shoppingDeviceKey,id)}
+  return id;
+}
+async function shoppingRequest(action,data={}){
+  if(!syncTokens.family)throw new Error('Aktiviere zuerst den Family-Zugang unter Kalendersynchronisation.');
+  const response=await fetch('https://werhans-kalender.mathiaswerhan.workers.dev/shopping',{
+    method:action?'PUT':'GET',
+    headers:{Authorization:'Bearer '+syncTokens.family,...(action?{'Content-Type':'application/json'}:{})},
+    body:action?JSON.stringify({...data,action,device:shoppingDevice()}):undefined,
+    signal:AbortSignal.timeout(10000)
+  });
+  const result=await response.json();
+  if(!response.ok)throw new Error(result.error||'Einkaufsliste konnte nicht geladen werden.');
+  return result;
+}
+function applyShopping(items){
+  const changed=JSON.stringify(sharedShopping)!==JSON.stringify(items);
+  sharedShopping=items;
+  if(changed&&view==='home')render();
+  if(changed&&view==='shopping')shoppingUpdateList?.();
+}
+async function refreshShopping(){
+  if(!shoppingEnabled()||shoppingBusy||!['home','shopping'].includes(view))return;
+  const version=++shoppingReadVersion;
+  try{
+    const result=await shoppingRequest();
+    if(version===shoppingReadVersion&&shoppingEnabled()){
+      shoppingNotice='';
+      applyShopping(result.items);
+      if(view==='shopping')el('shoppingConnection').textContent='';
+    }
+  }catch(error){
+    if(version===shoppingReadVersion&&shoppingEnabled()){
+      shoppingNotice='Gemeinsame Liste konnte gerade nicht aktualisiert werden.';
+      if(view==='shopping')el('shoppingConnection').textContent=shoppingNotice;
+    }
+  }
+}
+async function changeShopping(action,data){
+  if(shoppingBusy)throw new Error('Die Einkaufsliste wird gerade gespeichert.');
+  shoppingBusy=true;
+  ++shoppingReadVersion;
+  try{
+    const result=await shoppingRequest(action,data);
+    applyShopping(result.items);
+  }finally{shoppingBusy=false}
+}
+function pushKeyBytes(key){
+  return Uint8Array.from(atob(key.replaceAll('-','+').replaceAll('_','/')),c=>c.charCodeAt(0));
+}
+function renderShoppingSettings(area){
+  const section=node('section','',area);
+  node('h3','Einkaufsliste',section);
+  const label=node('label','Gemeinsame Einkaufsliste synchronisieren',section);
+  const toggle=node('input','',label);toggle.type='checkbox';toggle.checked=shoppingEnabled();
+  const status=node('p','',section);status.setAttribute('role','status');
+  const pushButton=button('Einkaufsbenachrichtigungen aktivieren',enablePush,section);
+  const muteButton=button('Einkaufsbenachrichtigungen ausschalten',disablePush,section);
+  pushButton.disabled=true;
+  muteButton.disabled=true;
+  const pushState=node('p','',section);
+  async function preparePush(){
+    if(!('serviceWorker' in navigator)||!('PushManager' in window)){
+      pushState.textContent='Öffne den Planer über das Home-Bildschirm-Symbol, um Push einzurichten.';
+      return;
+    }
+    try{
+      pushRegistration=await navigator.serviceWorker.register('./werhans-push.js');
+      await navigator.serviceWorker.ready;
+      const subscription=await pushRegistration.pushManager.getSubscription();
+      muteButton.disabled=!subscription;
+      pushState.textContent=subscription?'Push ist auf diesem Gerät eingerichtet.':'Push ist auf diesem Gerät ausgeschaltet.';
+      if(!syncTokens.family){pushButton.disabled=true;return}
+      const result=await shoppingRequest();
+      shoppingPublicKey=result.publicKey;
+      pushButton.disabled=!shoppingPublicKey;
+      if(!shoppingPublicKey)pushState.textContent='Die Push-Schlüssel am Server fehlen noch.';
+    }catch(error){pushState.textContent=error.message;}
+  }
+  async function enablePush(){
+    pushButton.disabled=true;
+    try{
+      const subscription=await pushRegistration.pushManager.subscribe({
+        userVisibleOnly:true,applicationServerKey:pushKeyBytes(shoppingPublicKey)
+      });
+      try{await shoppingRequest('subscribe',{subscription:subscription.toJSON()});}
+      catch(error){await subscription.unsubscribe();throw error;}
+      muteButton.disabled=false;
+      pushState.textContent='Einkaufsbenachrichtigungen sind aktiviert.';
+    }catch(error){pushState.textContent=error.message;}
+    finally{pushButton.disabled=false;}
+  }
+  async function disablePush(){
+    muteButton.disabled=true;
+    try{
+      const subscription=await pushRegistration.pushManager.getSubscription();
+      if(subscription)await subscription.unsubscribe();
+      if(syncTokens.family)await shoppingRequest('unsubscribe');
+      pushState.textContent='Einkaufsbenachrichtigungen sind ausgeschaltet.';
+    }catch(error){pushState.textContent=error.message;muteButton.disabled=false;}
+  }
+  toggle.onchange=async()=>{
+    toggle.disabled=true;
+    try{
+      if(toggle.checked){
+        const result=await shoppingRequest();
+        applyShopping(result.items);
+        localStorage.setItem(shoppingEnabledKey,'1');
+        status.textContent='Gemeinsame Liste aktiviert. Die bisherige Liste bleibt auf diesem Gerät.';
+      }else{
+        ++shoppingReadVersion;
+        localStorage.removeItem(shoppingEnabledKey);
+        status.textContent='Die lokale Einkaufsliste ist aktiv.';
+      }
+    }catch(error){toggle.checked=shoppingEnabled();status.textContent=error.message;}
+    finally{toggle.disabled=false;}
+  };
+  preparePush();
+}
+window.addEventListener('focus',refreshShopping);
+setInterval(()=>{if(!document.hidden)refreshShopping()},15000);
+
 function renderShopping(area){
   state.shopping ||= [];
   node('h2','Einkaufsliste',area);
+  const connection=node('p',shoppingNotice,area);connection.id='shoppingConnection';connection.setAttribute('role','status');
   const form=node('form','',area);form.className='shop-form';
   const searchLabel=node('label','Artikel suchen oder eingeben',form);
   const search=node('input','',searchLabel);search.type='search';search.maxLength=100;
@@ -545,8 +689,8 @@ function renderShopping(area){
   function updateList(){
     current.replaceChildren();
     boughtItems.replaceChildren();
-    const pending=state.shopping.filter(item=>!item.done);
-    const purchased=state.shopping.filter(item=>item.done);
+    const pending=displayedShopping().filter(item=>!item.done);
+    const purchased=displayedShopping().filter(item=>item.done);
     boughtTitle.textContent='Gekauft · '+purchased.length;
     bought.hidden=!purchased.length;
     node('h3','Einkaufen · '+pending.length,current);
@@ -557,14 +701,29 @@ function renderShopping(area){
       grid.className='shop-grid shop-list';
       grid.dataset.density=items.length>=16?'high':items.length>=7?'medium':'low';
       for(const item of items){
-        const tile=productTile(item,()=>{
-          item.done=!item.done;save();updateList();
-          feedback.textContent=item.title+(item.done?' abgehakt.':' wieder auf der Einkaufsliste.');
-          const next=parent.querySelector('button')||(done?search:boughtTitle);
-          next.focus({preventScroll:true});
-        },grid);
+        const tileParent=done?grid:node('div','',grid);
+        if(!done)tileParent.className='shopping-item';
+        const tile=productTile(item,async()=>{
+          try{
+            if(shoppingEnabled())await changeShopping(done?'restore':'check',{id:item.id});
+            else {item.done=!done;save();updateList();}
+            feedback.textContent=item.title+(done?' wieder auf der Einkaufsliste.':' abgehakt.');
+            (parent.querySelector('button')||search).focus({preventScroll:true});
+          }catch(error){feedback.textContent=error.message;}
+        },tileParent);
         tile.classList.add(done?'shop-bought':'shop-open');
         tile.setAttribute('aria-label',item.title+(item.quantity?', '+item.quantity:'')+(done?', wieder hinzufügen':', abhaken'));
+        if(!done){
+          const remove=button('Entfernen',async()=>{
+            if(!confirm(item.title+' von der Liste entfernen?'))return;
+            try{
+              if(shoppingEnabled())await changeShopping('remove',{id:item.id});
+              else {state.shopping=state.shopping.filter(entry=>entry!==item);save();updateList();}
+              feedback.textContent=item.title+' entfernt.';
+            }catch(error){feedback.textContent=error.message;}
+          },tileParent);
+          remove.setAttribute('aria-label',item.title+' entfernen');
+        }
       }
     }
   }
@@ -575,12 +734,18 @@ function renderShopping(area){
     if(item.quantity||item.done)node('small',[item.quantity,item.done?'✓ Gekauft':''].filter(Boolean).join(' · '),tile);
     return tile;
   }
-  function addProduct(product){
+  async function addProduct(product){
     const amount=quantity.value.trim();
-    const existing=state.shopping.find(item=>groceryKey(item.title)===groceryKey(product.title));
-    if(existing){existing.done=false;if(amount)existing.quantity=amount}
-    else state.shopping.push({...product,quantity:amount,done:false});
-    save();search.value='';quantity.value='';catalogPanel.open=false;updateList();updateCatalog();
+    try{
+      if(shoppingEnabled())await changeShopping('add',{...product,quantity:amount});
+      else{
+        const existing=state.shopping.find(item=>groceryKey(item.title)===groceryKey(product.title));
+        if(existing){existing.done=false;if(amount)existing.quantity=amount}
+        else state.shopping.push({...product,quantity:amount,done:false});
+        save();
+      }
+    }catch(error){feedback.textContent=error.message;return;}
+    search.value='';quantity.value='';catalogPanel.open=false;updateList();updateCatalog();
     feedback.textContent=product.title+' steht auf der Einkaufsliste.';
   }
   function updateCatalog(){
@@ -613,6 +778,7 @@ function renderShopping(area){
     const known=groceryItems.find(item=>groceryProductKey(item.title)===groceryProductKey(title));
     addProduct(known||{title,icon:'🛒'});
   };
+  shoppingUpdateList=updateList;
   search.oninput=()=>{catalogPanel.open=Boolean(search.value.trim());updateCatalog()};
   updateList();updateCatalog();
 }
@@ -789,6 +955,12 @@ function renderSyncSettings(area){
   }
 }
 
+const dayDialog=el('dayDialog');
+el('closeDay').onclick=()=>dayDialog.close();
+el('newDayEvent').onclick=()=>openEditor();
+dayDialog.addEventListener('close',()=>{
+  screen.querySelector('.month-day[aria-pressed="true"]')?.focus({preventScroll:true});
+});
 function renderCalendar(area){
   const today=localDay(new Date());
   selectedDay ||= today;
@@ -855,9 +1027,10 @@ function renderCalendar(area){
     const count=byDay.get(key)?.length||0;
     const pick=button('',()=>{
       selectedDay=key;
+      dayDialog.showModal();
       render();
-      screen.querySelector('.month-day[aria-pressed="true"]')?.focus({preventScroll:true});
     },grid);
+    pick.setAttribute('aria-haspopup','dialog');
     pick.className=cell%7>=5?'month-day weekend':'month-day';
     pick.setAttribute('aria-label',dateLabel(key)+(count?' · '+count+(count===1?' Termin':' Termine'):''));
     pick.setAttribute('aria-pressed',String(key===selectedDay));
@@ -866,10 +1039,13 @@ function renderCalendar(area){
     const dots=node('span','',pick);dots.className='day-dots';dots.setAttribute('aria-hidden','true');
     for(const item of (byDay.get(key)||[]).slice(0,4))node('i','',dots).style.setProperty('--event-color',calendarType(item).color);
   }
-  const agenda=node('section','',area);agenda.className='day-agenda';
-  node('h3',(selectedDay===today?'Heute · ':'')+dateLabel(selectedDay),agenda);
-  const list=node('div','',agenda);list.className='task-group';
-  const events=(byDay.get(selectedDay)||[]).slice().sort((a,b)=>(a.clock||'').localeCompare(b.clock||''));
+  if(dayDialog.open)renderDayAgenda(today,byDay.get(selectedDay)||[]);
+}
+function renderDayAgenda(today,items){
+  el('dayTitle').textContent=(selectedDay===today?'Heute · ':'')+dateLabel(selectedDay);
+  const list=el('dayEvents');
+  list.replaceChildren();
+  const events=items.slice().sort((a,b)=>(a.clock||'').localeCompare(b.clock||''));
   if(!events.length)node('p','Keine Termine an diesem Tag.',list).className='empty';
   for(const item of events){
     const entry=item.dayforce?node('div','',list):button('',()=>openEditor(item),list);
@@ -1069,5 +1245,6 @@ window.addEventListener('blur',()=>{activePointers.clear();resizeTasks()});
 window.addEventListener('resize',resizeTasks);
 window.visualViewport?.addEventListener('resize',resizeTasks);
 render();
+refreshShopping();
 </script></html>
 

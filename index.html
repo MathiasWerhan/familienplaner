@@ -1,4 +1,5 @@
-<!doctype html><html lang="de"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>The 4 Werhans</title>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>The 4 Werhans</title>
+<link rel="apple-touch-icon" href="./werhans-icon.png">
 <style>
 :root{color-scheme:light;--ink:#172b39;--muted:#526574;--accent:#174d55;--line:#d6e1e2;--paper:#fff;--canvas:#f2f6f5}
 *{box-sizing:border-box}
@@ -270,7 +271,7 @@ main:has(.profile-picker) .app-version{margin-top:6px}
 .family-key::before,.day-dots i{background:var(--event-color,var(--family-color))}
 .event-line{border-inline-start-color:var(--event-color,var(--family-color))}
 .shopping-item{display:grid;gap:4px;min-width:0}.shopping-item>button:last-child{font-size:.72rem;padding:4px 6px;min-height:32px}.settings input[type=checkbox]{width:24px;min-height:24px}
-</style><main><header><h1>The 4 Werhans</h1></header><section id="screen"></section><footer class="app-version"><small>V42 · Lokale Daten und Kalenderabgleich</small></footer><button class="new" id="add">＋ Neu</button></main>
+</style></head><body><main><header><h1>The 4 Werhans</h1></header><section id="screen"></section><footer class="app-version"><small>V43 · Lokale Daten und Kalenderabgleich</small></footer><button class="new" id="add">＋ Neu</button></main>
 <dialog id="dayDialog" aria-labelledby="dayTitle">
 <div class="day-dialog-header"><h2 id="dayTitle"></h2><button type="button" id="closeDay" autofocus>Schließen</button></div>
 <div id="dayEvents" class="task-group"></div>
@@ -1257,5 +1258,5 @@ window.addEventListener('resize',resizeTasks);
 window.visualViewport?.addEventListener('resize',resizeTasks);
 render();
 refreshShopping();
-</script></html>
+</script></body></html>
 

@@ -35,7 +35,13 @@ form input,form select,.settings input{width:100%;min-width:0;max-width:100%;min
 .minute-buttons{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;margin-top:6px}
 .minute-buttons button{padding:4px;font-size:.9rem}
 input::-webkit-date-and-time-value{text-align:left;margin:0}
-.settings section{margin-top:14px;padding:14px;background:var(--paper);border:1px solid var(--line);border-radius:16px}
+.settings-panel{margin-top:12px;background:var(--paper);border:1px solid var(--line);border-radius:16px}
+.settings-panel>summary{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:48px;padding:12px 14px;font-weight:700;cursor:pointer;list-style:none}
+.settings-panel>summary::-webkit-details-marker{display:none}
+.settings-panel>summary::after{content:"";width:8px;height:8px;flex:none;margin-right:3px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(-45deg)}
+.settings-panel[open]>summary::after{transform:rotate(45deg)}
+.settings-panel[open]>summary{border-bottom:1px solid var(--line)}
+.settings-panel>div{padding:4px 14px 14px}
 #frame{position:fixed;inset:0;z-index:4;background:#10241d;width:100%;height:100%;border:0;border-radius:0;padding:0}#frame img{width:100%;height:100%;object-fit:contain}[hidden]{display:none!important}
 
  .calendar-header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
@@ -264,7 +270,7 @@ main:has(.profile-picker) .app-version{margin-top:6px}
 .family-key::before,.day-dots i{background:var(--event-color,var(--family-color))}
 .event-line{border-inline-start-color:var(--event-color,var(--family-color))}
 .shopping-item{display:grid;gap:4px;min-width:0}.shopping-item>button:last-child{font-size:.72rem;padding:4px 6px;min-height:32px}.settings input[type=checkbox]{width:24px;min-height:24px}
-</style><main><header><h1>The 4 Werhans</h1></header><section id="screen"></section><footer class="app-version"><small>V41 · Lokale Daten und Kalenderabgleich</small></footer><button class="new" id="add">＋ Neu</button></main>
+</style><main><header><h1>The 4 Werhans</h1></header><section id="screen"></section><footer class="app-version"><small>V42 · Lokale Daten und Kalenderabgleich</small></footer><button class="new" id="add">＋ Neu</button></main>
 <dialog id="dayDialog" aria-labelledby="dayTitle">
 <div class="day-dialog-header"><h2 id="dayTitle"></h2><button type="button" id="closeDay" autofocus>Schließen</button></div>
 <div id="dayEvents" class="task-group"></div>
@@ -426,7 +432,7 @@ function render(){
   button('‹ Zur Profilauswahl',()=>go('home')).className='back';
   const area=node('section');
   if(view==='settings'){area.className='settings';
-  node('h2','Einstellungen',area);renderSyncSettings(area);renderShoppingSettings(area);const profiles=node('section','',area);node('h3','Profilbilder',profiles);for(const name of names){const l=node('label',name,profiles);const f=node('input','',l);f.type='file';f.accept='image/*';f.onchange=async()=>{if(!f.files[0])return;try{state.avatars[name]=await resize(f.files[0],240);save()}catch{alert('Dieses Foto konnte nicht gespeichert werden.')}}}const slides=node('section','',area);node('h3','Bilderrahmen',slides);const label=node('label','Fotos für den Bilderrahmen (bis zu 100)',slides);const upload=node('input','',label);upload.type='file';upload.accept='image/*';upload.multiple=true;const count=node('small',photos.length+' Fotos · für diese Sitzung',slides);upload.onchange=()=>{if(!upload.files.length)return;photos.forEach(URL.revokeObjectURL);photos=Array.from(upload.files).slice(0,100).map(f=>URL.createObjectURL(f));count.textContent=photos.length+' Fotos · für diese Sitzung';reset()};
+  node('h2','Einstellungen',area);renderSyncSettings(area);renderShoppingSettings(area);const profiles=settingsPanel('Profilbilder',area);for(const name of names){const l=node('label',name,profiles);const f=node('input','',l);f.type='file';f.accept='image/*';f.onchange=async()=>{if(!f.files[0])return;try{state.avatars[name]=await resize(f.files[0],240);save()}catch{alert('Dieses Foto konnte nicht gespeichert werden.')}}}const slides=settingsPanel('Bilderrahmen',area);const label=node('label','Fotos für den Bilderrahmen (bis zu 100)',slides);const upload=node('input','',label);upload.type='file';upload.accept='image/*';upload.multiple=true;const count=node('small',photos.length+' Fotos · für diese Sitzung',slides);upload.onchange=()=>{if(!upload.files.length)return;photos.forEach(URL.revokeObjectURL);photos=Array.from(upload.files).slice(0,100).map(f=>URL.createObjectURL(f));count.textContent=photos.length+' Fotos · für diese Sitzung';reset()};
 for(const [key,label] of [['wait','Start nach Sekunden (0 = aus)'],['interval','Bildwechsel nach Sekunden']]){const l=node('label',label,slides),i=node('input','',l);i.type='number';i.min=key==='wait'?0:1;i.value=state[key];i.onchange=()=>{if(i.value!==''&&i.checkValidity()){state[key]=Number(i.value);save();reset()}else i.value=state[key]}}button('Diashow testen',()=>photos.length?showFrame():alert('Wähle zuerst Fotos aus.'),slides);return}
 
   if(view==='calendar'){area.className='calendar-view';renderCalendar(area);return}
@@ -593,9 +599,15 @@ async function changeShopping(action,data){
 function pushKeyBytes(key){
   return Uint8Array.from(atob(key.replaceAll('-','+').replaceAll('_','/')),c=>c.charCodeAt(0));
 }
+function settingsPanel(title,area){
+  const panel=node('details','',area);
+  panel.className='settings-panel';
+  panel.setAttribute('name','werhans-settings');
+  node('summary',title,panel);
+  return node('div','',panel);
+}
 function renderShoppingSettings(area){
-  const section=node('section','',area);
-  node('h3','Einkaufsliste',section);
+  const section=settingsPanel('Einkaufsliste',area);
   const label=node('label','Gemeinsame Einkaufsliste synchronisieren',section);
   const toggle=node('input','',label);toggle.type='checkbox';toggle.checked=shoppingEnabled();
   const status=node('p','',section);status.setAttribute('role','status');
@@ -917,8 +929,7 @@ async function refreshShared(){
   if(view==='calendar'&&!editor.open&&previous!==JSON.stringify([syncStatus,sharedItems]))render();
 }
 function renderSyncSettings(area){
-  const settings=node('section','',area);
-  node('h3','Kalendersynchronisation',settings);
+  const settings=settingsPanel('Kalendersynchronisation',area);
   for(const scope of syncScopes){
     const label=node('label',calendarTypes[scope].label,settings);
     const input=node('input','',label);

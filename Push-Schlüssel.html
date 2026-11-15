@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="de">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Werhans Push-Schlüssel</title>
+<h1>Werhans Push-Schlüssel</h1>
+<button id="generate">Schlüssel erzeugen</button>
+<pre id="result" style="white-space:pre-wrap;overflow-wrap:anywhere"></pre>
+<script>
+const button = document.getElementById('generate');
+const result = document.getElementById('result');
+
+button.onclick = async () => {
+  button.disabled = true;
+  try {
+    const pair = await crypto.subtle.generateKey(
+      { name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign', 'verify']
+    );
+    const raw = new Uint8Array(await crypto.subtle.exportKey('raw', pair.publicKey));
+    const publicKey = btoa(String.fromCharCode(...raw))
+      .replaceAll('+', '-').replaceAll('/', '_').replace(/=+$/, '');
+    const privateKey = await crypto.subtle.exportKey('jwk', pair.privateKey);
+    result.textContent =
+      'SHOP_PUSH_PUBLIC\n' + publicKey +
+      '\n\nSHOP_PUSH_PRIVATE\n' + privateKey.d;
+  } catch {
+    result.textContent = 'Schlüssel konnten nicht erzeugt werden.';
+    button.disabled = false;
+  }
+};
+</script>
+</html>

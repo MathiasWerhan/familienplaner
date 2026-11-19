@@ -309,7 +309,31 @@ body[data-custom-background]::before{
   .month-toolbar{padding:8px}
   .month-toolbar .bar{width:100%;justify-content:space-between}
 }
-</style></head><body><main><header><h1>The 4 Werhans</h1></header><section id="screen"></section><footer class="app-version"><small>V45 · Lokale Daten und Kalenderabgleich</small></footer><button class="new" id="add">＋ Neu</button></main>
+
+.task-filters{margin-bottom:14px}
+.task-filters [aria-pressed=true]{background:var(--accent);color:white}
+.shopping-view{background:#f8fafc;padding:14px;border-radius:18px}
+.shopping-view .shop-form{align-items:end;gap:12px}
+.quantity-controls{display:flex;gap:8px}
+.quantity-controls button{width:48px;min-height:48px;font-size:1.4rem}
+.shopping-view .shop-form label.shop-quantity{flex:1 1 130px}
+.shopping-view .shop-tile{min-height:100px;font-size:1rem}
+.shopping-view .shop-list .shop-tile{border-width:2px}
+.shopping-view .shop-bought{border-style:dashed}
+.shopping-view details{margin-top:16px}
+.shopping-view summary{min-height:48px}
+#actionFeedback{position:fixed;z-index:10;left:50%;bottom:80px;transform:translateX(-50%);width:max-content;max-width:calc(100% - 32px);padding:12px 18px;background:#fff;color:#19243b;border:2px solid #284bb0;border-radius:12px;box-shadow:0 3px 12px #19243b20}
+@media(max-width:699px){
+ .shopping-view{padding:10px}
+ .shopping-view .shop-form>label:first-child{flex-basis:100%}
+}
+
+.calendar-view > .shift-menu{margin-top:18px;width:100%;flex:none}
+#screen .shift-menu.settings-panel > summary{width:auto;font-size:.9rem}
+.shift-menu form input{max-width:100%;min-width:0}
+.shift-menu form label{max-width:100%;min-width:0}
+.shift-menu form button{white-space:normal}
+</style></head><body><main><header><h1>The 4 Werhans</h1></header><section id="screen"></section><footer class="app-version"><small>V49 · Lokale Daten und Kalenderabgleich</small></footer><button class="new" id="add">＋ Neu</button></main>
 <dialog id="dayDialog" aria-labelledby="dayTitle">
 <div class="day-dialog-header"><h2 id="dayTitle"></h2><button type="button" id="closeDay" autofocus>Schließen</button></div>
 <div id="dayEvents" class="task-group"></div>
@@ -357,6 +381,16 @@ function dateLabel(day){
   return day ? new Intl.DateTimeFormat('de-DE',{day:'numeric',month:'short',year:'numeric'}).format(new Date(day+'T12:00:00')) : '';
 }
 let taskPage=0;
+let taskFilter='Offen';
+function showFeedback(message){
+  let status=el('actionFeedback');
+  if(!status){
+    status=node('p','',document.body);status.id='actionFeedback';status.setAttribute('role','status');
+  }
+  status.textContent=message;status.hidden=false;
+  clearTimeout(showFeedback.timer);
+  showFeedback.timer=setTimeout(()=>{status.hidden=true},5000);
+}
 function taskRow(item,parent){
   const done=item.status==='Erledigt';
   const row=node('div','',parent);
@@ -367,6 +401,7 @@ function taskRow(item,parent){
     item.status=status;
     save();
     render();
+    showFeedback(status==='Erledigt'?'Aufgabe erledigt.':'Aufgabe wieder offen.');
     screen.querySelectorAll('.task-toggle').forEach(control=>{
       if(control.dataset.taskId===String(item.id))control.focus({preventScroll:true});
     });
@@ -480,7 +515,12 @@ for(const [key,label] of [['wait','Start nach Sekunden (0 = aus)'],['interval','
   node('h2',view==='all'?'Alle Aufgaben':view+' · Aufgaben',head);
   const doneCount=state.items.filter(item=>item.kind==='Aufgabe'&&(view==='all'||item.who===view)&&item.status==='Erledigt').length;
   node('small',doneCount+' erledigt',head);
-  const tasks=state.items.filter(item=>item.kind==='Aufgabe'&&(view==='all'||item.who===view))
+  const filters=node('div','',area);filters.className='bar task-filters';
+  for(const status of ['Offen','Erledigt']){
+    const control=button(status,()=>{taskFilter=status;taskPage=0;render()},filters);
+    control.setAttribute('aria-pressed',String(taskFilter===status));
+  }
+  const tasks=state.items.filter(item=>item.kind==='Aufgabe'&&(view==='all'||item.who===view)&&(taskFilter==='Erledigt'?item.status==='Erledigt':item.status!=='Erledigt'))
     .sort((a,b)=>(a.day||'9999').localeCompare(b.day||'9999'));
   const list=node('div','',area);
   list.className='fitted-tasks';
@@ -493,7 +533,7 @@ for(const [key,label] of [['wait','Start nach Sekunden (0 = aus)'],['interval','
   const shown=tasks.slice(taskPage*capacity,(taskPage+1)*capacity);
   list.style.setProperty('--task-height',Math.min(112,Math.max(56,Math.floor(remaining/Math.max(1,shown.length))-6))+'px');
   for(const item of shown)taskRow(item,list);
-  if(!shown.length)node('p','Noch keine Aufgaben.',list).className='empty';
+  if(!shown.length)node('p',taskFilter==='Offen'?'Keine offenen Aufgaben.':'Noch keine erledigten Aufgaben.',list).className='empty';
   const controls=node('div','',area);controls.className='bar task-pages';
   if(pages>1){
     button('‹',()=>{taskPage--;render();screen.querySelector('.next-page')?.focus()},controls).disabled=taskPage===0;
@@ -504,7 +544,7 @@ for(const [key,label] of [['wait','Start nach Sekunden (0 = aus)'],['interval','
     controls.firstElementChild.className='prev-page';
     controls.firstElementChild.setAttribute('aria-label','Vorherige Aufgabenseite');
   }
-  if(undo)button('Rückgängig',()=>{undo.item.status=undo.status;undo=null;save();render()},controls);
+  if(undo)button('Letzte Änderung rückgängig',()=>{undo.item.status=undo.status;undo=null;save();render()},controls);
 
 }
 const groceryCatalog=Object.entries({
@@ -916,17 +956,49 @@ setInterval(()=>{if(!document.hidden)refreshShopping()},15000);
 
 function renderShopping(area){
   state.shopping ||= [];
+  area.className='shopping-view';
   node('h2','Einkaufsliste',area);
   const connection=node('p',shoppingNotice,area);connection.id='shoppingConnection';connection.setAttribute('role','status');
   const form=node('form','',area);form.className='shop-form';
   const searchLabel=node('label','Artikel suchen oder eingeben',form);
   const search=node('input','',searchLabel);search.type='search';search.maxLength=100;
   search.placeholder='z. B. Milch';
-  const qtyLabel=node('label','Menge',form);qtyLabel.className='shop-quantity';
+  const qtyLabel=node('label','Menge (optional)',form);qtyLabel.className='shop-quantity';
   const quantity=node('input','',qtyLabel);quantity.maxLength=35;quantity.placeholder='z. B. 2 l';
+  const quantityControls=node('div','',form);quantityControls.className='quantity-controls';
+  function stepQuantity(delta){
+    const match=quantity.value.trim().match(/^(\d+)(?:[.,](\d+))?\s*(.*)$/);
+    if(quantity.value.trim()&&!match){
+      quantity.focus();
+      quantity.setCustomValidity('Zum Ändern bitte eine Zahl mit Einheit eingeben, zum Beispiel 2 l.');
+      quantity.reportValidity();
+      return;
+    }
+    const value=match?Number(match[1]+'.'+(match[2]||'0')):1;
+    quantity.value=String(Math.max(1,Math.round((value+delta)*100)/100)).replace('.',',')+(match?.[3]?' '+match[3]:'');
+    quantity.setCustomValidity('');
+  }
+  quantity.oninput=()=>quantity.setCustomValidity('');
+  const minus=button('−',()=>stepQuantity(-1),quantityControls);minus.type='button';minus.setAttribute('aria-label','Menge verringern');
+  const plus=button('+',()=>stepQuantity(1),quantityControls);plus.type='button';plus.setAttribute('aria-label','Menge erhöhen');
   const submit=node('button','Hinzufügen',form);submit.className='primary';
   const current=node('div','',area);
   const feedback=node('small','',area);feedback.setAttribute('role','status');
+  const undoShopping=button('Letztes Abhaken rückgängig',async()=>{
+    if(!lastChecked)return;
+    const item=lastChecked;
+    undoShopping.disabled=true;
+    try{
+      if(shoppingEnabled())await changeShopping('restore',{id:item.id});
+      else{item.done=false;save();updateList();}
+      lastChecked=null;undoShopping.hidden=true;
+      feedback.textContent=item.title+' wieder auf der Einkaufsliste.';
+    }catch(error){feedback.textContent=error.message;}
+    finally{undoShopping.disabled=false;}
+  },area);
+  undoShopping.hidden=true;
+  let lastChecked=null;
+  let adding=false;
   const bought=node('details','',area);
   const boughtTitle=node('summary','',bought);
   const boughtItems=node('div','',bought);
@@ -942,7 +1014,7 @@ function renderShopping(area){
     const purchased=displayedShopping().filter(item=>item.done);
     boughtTitle.textContent='Gekauft · '+purchased.length;
     bought.hidden=!purchased.length;
-    node('h3','Einkaufen · '+pending.length,current);
+    node('h3','Noch einkaufen · '+pending.length,current);
     if(!pending.length)node('p','Deine Liste ist leer.',current).className='empty';
     for(const [items,parent,done] of [[pending,current,false],[purchased,boughtItems,true]]){
       if(!items.length)continue;
@@ -953,12 +1025,17 @@ function renderShopping(area){
         const tileParent=done?grid:node('div','',grid);
         if(!done)tileParent.className='shopping-item';
         const tile=productTile(item,async()=>{
+          if(tile.disabled)return;
+          tile.disabled=true;
           try{
             if(shoppingEnabled())await changeShopping(done?'restore':'check',{id:item.id});
             else {item.done=!done;save();updateList();}
+            lastChecked=done?null:item;
+            undoShopping.hidden=done;
             feedback.textContent=item.title+(done?' wieder auf der Einkaufsliste.':' abgehakt.');
             (parent.querySelector('button')||search).focus({preventScroll:true});
           }catch(error){feedback.textContent=error.message;}
+          finally{tile.disabled=false;}
         },tileParent);
         tile.classList.add(done?'shop-bought':'shop-open');
         tile.setAttribute('aria-label',item.title+(item.quantity?', '+item.quantity:'')+(done?', wieder hinzufügen':', abhaken'));
@@ -984,6 +1061,8 @@ function renderShopping(area){
     return tile;
   }
   async function addProduct(product){
+    if(adding)return;
+    adding=true;submit.disabled=true;
     const amount=quantity.value.trim();
     try{
       if(shoppingEnabled())await changeShopping('add',{...product,quantity:amount});
@@ -994,6 +1073,7 @@ function renderShopping(area){
         save();
       }
     }catch(error){feedback.textContent=error.message;return;}
+    finally{adding=false;submit.disabled=false;}
     search.value='';quantity.value='';catalogPanel.open=false;updateList();updateCatalog();
     feedback.textContent=product.title+' steht auf der Einkaufsliste.';
   }
@@ -1087,10 +1167,11 @@ function clearDayforceAccess(){
 
 function renderDayforce(area){
   const menu=node('details','',area);
-  menu.className='shift-menu';
-  menu.open=!dayforceKey;
-  node('summary','Sindys Schichten',menu);
-  const form=node('form','',menu);
+  menu.className='shift-menu settings-panel';
+  menu.open=false;
+  node('summary','Sindys Schichten · Einstellungen',menu);
+  const content=node('div','',menu);
+  const form=node('form','',content);
   form.className='bar';
   form.style.marginBlock='12px';
   let keyInput;
@@ -1205,7 +1286,7 @@ function renderSyncSettings(area){
 
 const dayDialog=el('dayDialog');
 el('closeDay').onclick=()=>dayDialog.close();
-el('newDayEvent').onclick=()=>openEditor();
+el('newDayEvent').onclick=()=>openEditor(null,true);
 dayDialog.addEventListener('close',()=>{
   screen.querySelector('.month-day[aria-pressed="true"]')?.focus({preventScroll:true});
 });
@@ -1230,7 +1311,6 @@ function renderCalendar(area){
     tab.setAttribute('aria-pressed',String(mode===calendarMode));
   }
   node('p','Wähle einen Tag, um seine Termine zu sehen.',area).className='calendar-help';
-  renderDayforce(area);
   if(syncStatus)node('p',syncStatus,area).setAttribute('role','status');
   const weekly=calendarMode==='Woche';
   const monday=new Date(year,month-1,day);
@@ -1295,8 +1375,9 @@ function renderCalendar(area){
     node('h3',(selectedDay===today?'Heute · ':'')+dateLabel(selectedDay),agenda);
     const list=node('div','',agenda);list.className='task-group';
     renderDayAgenda(today,byDay.get(selectedDay)||[],list);
-    button('+ Termin für diesen Tag',()=>openEditor(),agenda).className='primary';
+    button('+ Termin für diesen Tag',()=>openEditor(null,true),agenda).className='primary';
   }
+  renderDayforce(area);
   if(dayDialog.open)renderDayAgenda(today,byDay.get(selectedDay)||[]);
 }
 function renderDayAgenda(today,items,target=null){
@@ -1386,6 +1467,7 @@ function fields(){
 }
 el('kind').onchange=()=>{fields();arrangeCalendarForm()};
 
+let quickEventEntry=false;
 function arrangeCalendarForm(){
   const form=el('form');
   const event=el('kind').value==='Termin';
@@ -1393,10 +1475,10 @@ function arrangeCalendarForm(){
   const actions=el('cancel').parentElement;
   const scope=el('calendarScopeLabel');
   const reminderSection=el('reminderField');
-  form.insertBefore(scope,el('whoLabel'));
-  form.insertBefore(el('timeLabel'),el('attendeeField'));
   let extra=el('calendarExtras');
   if(!extra){
+    form.insertBefore(scope,el('whoLabel'));
+    form.insertBefore(el('timeLabel'),actions);
     extra=node('details','',form);extra.id='calendarExtras';
     node('summary','Weitere Angaben',extra);
     extra.append(el('attendeeField'),reminderSection);
@@ -1404,16 +1486,18 @@ function arrangeCalendarForm(){
   form.insertBefore(extra,actions);
   extra.hidden=!event;
   extra.open=false;
-  title.firstChild.textContent=event?'Was steht an?':'Titel';
+  title.firstChild.textContent=event?'Was steht an?':'Was ist zu tun?';
+  el('dayCaption').textContent=event?'Datum':'Bis wann? (optional)';
   el('editorTitle').textContent=event?(editingEvent?'Termin bearbeiten':'Neuer Termin'):'Neue Aufgabe';
-  el('kindLabel').hidden=event;
+  el('kindLabel').hidden=Boolean(editingEvent)||quickEventEntry;
   if(event){
     el('calendarScopeLabel').querySelector('small').textContent=
       'Family · Familie | Matze & Sindy · gemeinsam | Privat · dieses Gerät';
   }
 }
 
-function openEditor(item=null){
+function openEditor(item=null,quickEvent=false){
+  quickEventEntry=quickEvent;
   editingEvent=item;
   el('form').reset();
   el('editorTitle').textContent=item?'Termin bearbeiten':'Neuer Eintrag';
@@ -1501,7 +1585,9 @@ el('form').onsubmit=async event=>{
   undo=null;
   save();
   editor.close();
+  if(kind==='Aufgabe')taskFilter='Offen';
   go(kind==='Termin'?'calendar':who);
+  showFeedback(kind==='Termin'?'Termin gespeichert.':'Aufgabe gespeichert.');
 };
 
 function showFrame(){if(!photos.length||editor.open)return;clearTimeout(idle);clearInterval(ticker);let index=0;el('frame').hidden=false;el('slide').src=photos[index];ticker=setInterval(()=>{index=(index+1)%photos.length;el('slide').src=photos[index]},state.interval*1000)}

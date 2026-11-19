@@ -1,0 +1,1799 @@
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>The 4 Werhans</title>
+<link rel="apple-touch-icon" href="./werhans-icon.png.PNG">
+<style>
+:root{color-scheme:light;--ink:#172b39;--muted:#526574;--accent:#174d55;--line:#d6e1e2;--paper:#fff;--canvas:#f2f6f5}
+*{box-sizing:border-box}
+body{margin:0;background:var(--canvas);color:var(--ink);font:17px/1.45 "DM Sans",system-ui,sans-serif}
+main{max-width:850px;margin:auto;padding:20px clamp(16px,4vw,38px) 112px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid var(--line);padding:0 0 14px;margin-bottom:24px}
+h1,h2,h3,p{margin:0}h1{font-size:1.2rem;letter-spacing:-.025em}h2{font-size:clamp(1.75rem,5vw,2.5rem);letter-spacing:-.045em;line-height:1.1}h3{font-size:1rem}
+small{color:var(--muted);font-size:.78rem}
+button,a,input,select{font:inherit}button,a{min-height:44px;color:var(--ink);font-weight:650;border:1px solid var(--line);border-radius:12px;padding:8px 14px;background:var(--paper);cursor:pointer;text-decoration:none}
+:focus-visible{outline:3px solid #347586;outline-offset:3px}button:active{transform:translateY(1px)}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.bar a{display:inline-flex;align-items:center}
+.new,.primary{background:var(--accent);color:#fff;border-color:var(--accent)}.new{position:fixed;z-index:1;right:max(18px,calc((100vw - 780px)/2));bottom:max(18px,env(safe-area-inset-bottom));box-shadow:0 5px 18px #174d5540;padding:11px 20px}
+.back{background:transparent;border-color:transparent;padding-left:0;margin-bottom:14px;color:var(--accent)}
+.profile-picker{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px 12px;max-width:560px;margin:32px auto}
+.profile-picker .profile{display:grid;justify-items:center;gap:5px;background:none;border:0;padding:4px 8px}.profile strong{font-size:1.1rem}.profile>span:last-child{font-size:.85rem;color:var(--muted)}
+.avatar{display:grid;place-items:center;width:clamp(76px,15vw,120px);aspect-ratio:1;border-radius:50%;background:var(--c);font-weight:750;font-size:clamp(1.65rem,5vw,2.5rem);overflow:hidden;border:3px solid #fff;box-shadow:0 4px 13px #17364222}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.profile-nav{justify-content:center;margin-top:24px}
+.list-head{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:18px}
+.task-group{margin:0 0 14px;background:var(--paper);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.group-head{display:flex;align-items:center;gap:9px;padding:10px 14px;background:#e7efef;border-bottom:1px solid var(--line)}
+.group-head .avatar{width:32px;font-size:.85rem;border-width:1px;box-shadow:none}
+.group-head small{margin-left:auto}
+.entry{padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;background:var(--paper)}
+.entry+.entry{border-top:1px solid var(--line)}.entry-text{min-width:0;flex:1 1 150px;overflow-wrap:anywhere}.entry-text p{color:var(--muted);font-size:.86rem;margin-top:3px}
+.entry .bar button{font-size:.87rem}.empty{color:var(--muted);padding:12px 14px}.undo{margin-top:10px}
+dialog{margin:auto;width:min(calc(100% - 24px),470px);max-height:calc(100dvh - 24px);overflow:auto;border:0;border-radius:20px;background:var(--paper);color:var(--ink);padding:clamp(16px,5vw,26px)}
+dialog::backdrop{background:#172b3980}dialog h2{font-size:1.65rem;margin-bottom:16px}dialog .bar{justify-content:flex-end;margin-top:18px}
+form label,.settings label{display:grid;gap:5px;margin:10px 0;font-size:.9rem;font-weight:650}
+form input,form select,.settings input{width:100%;min-width:0;max-width:100%;min-height:44px;padding:8px 10px;border:1px solid #aebfc4;border-radius:10px;background:#fff;color:var(--ink);font-size:16px}
+.date-field{width:min(100%,14rem);grid-template-columns:minmax(0,1fr)}
+#timeLabel{border:0;padding:0;margin:10px 0;min-width:0;width:min(100%,16rem)}
+#timeLabel legend{padding:0;margin-bottom:5px;font-size:.9rem;font-weight:650}
+.minute-buttons{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;margin-top:6px}
+.minute-buttons button{padding:4px;font-size:.9rem}
+input::-webkit-date-and-time-value{text-align:left;margin:0}
+.settings-panel{margin-top:12px;background:var(--paper);border:1px solid var(--line);border-radius:16px}
+.settings-panel>summary{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:48px;padding:12px 14px;font-weight:700;cursor:pointer;list-style:none}
+.settings-panel>summary::-webkit-details-marker{display:none}
+.settings-panel>summary::after{content:"";width:8px;height:8px;flex:none;margin-right:3px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(-45deg)}
+.settings-panel[open]>summary::after{transform:rotate(45deg)}
+.settings-panel[open]>summary{border-bottom:1px solid var(--line)}
+.settings-panel>div{padding:4px 14px 14px}
+#frame{position:fixed;inset:0;z-index:4;background:#10241d;width:100%;height:100%;border:0;border-radius:0;padding:0}#frame img{width:100%;height:100%;object-fit:contain}[hidden]{display:none!important}
+
+ .calendar-header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.calendar-modes{display:flex;padding:3px;gap:3px;background:#e4eae8;border-radius:14px}
+.calendar-modes button{border:0;background:transparent;padding-inline:14px}
+.calendar-modes button[aria-pressed="true"]{background:#fff;box-shadow:0 1px 4px #17364225;color:var(--accent)}
+.month-panel{background:var(--paper);border:1px solid var(--line);border-radius:20px;overflow:hidden;box-shadow:0 8px 24px #1736420d}
+.month-toolbar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;padding:10px clamp(10px,3vw,20px);background:#eaf4f1}
+.month-toolbar h3{font-size:clamp(1rem,3vw,1.4rem);color:var(--accent)}
+.month-toolbar .bar{gap:4px}
+.month-toolbar button{padding:5px 8px;min-width:44px}
+.month-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));padding-inline:4px}
+.weekday{text-align:center;padding:9px 0;font-size:.8rem;color:var(--muted);font-weight:650}
+.month-day,.month-blank{min-width:0;min-height:clamp(46px,7vw,66px);border:0;border-top:1px solid var(--line);border-radius:0}
+.month-day{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:2px;font-variant-numeric:tabular-nums}
+.month-day.weekend{background:#f6f8f7;color:#526574}
+.month-day:focus-visible{outline-offset:-3px}
+.day-number{display:grid;place-items:center;width:29px;height:29px;border-radius:50%;line-height:1}
+.month-day[aria-current="date"] .day-number{box-shadow:inset 0 0 0 2px var(--accent)}
+.month-day[aria-pressed="true"] .day-number{color:white;background:var(--accent)}
+.day-dots{display:flex;gap:3px;align-items:center;min-height:6px}
+.day-dots i{width:6px;height:6px;background:var(--family-color);border-radius:50%}
+#dayDialog{width:min(calc(100% - 24px),600px);max-height:calc(100dvh - 24px - env(safe-area-inset-top) - env(safe-area-inset-bottom));overflow:hidden}
+#dayDialog[open]{display:flex;flex-direction:column;gap:12px}
+.day-dialog-header{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.day-dialog-header h2{font-size:1.15rem;margin:0}
+#dayEvents{min-height:0;overflow:auto;overscroll-behavior:contain;margin:0}
+.event-line{justify-content:flex-start;flex-wrap:nowrap;border-inline-start:5px solid var(--family-color)}
+.event-line .event-time{min-width:5.4em;color:var(--accent);font-variant-numeric:tabular-nums;font-size:.88rem}
+.event-line h4{margin:0;min-width:0;overflow-wrap:anywhere;font-size:1rem}
+.task-section + .task-section{margin-top:26px}
+.task-section>h3{margin-bottom:10px}
+.task-stack{display:grid;gap:9px;margin-bottom:14px}
+.task-owner{display:flex;align-items:center;gap:8px}
+.task-owner .avatar{width:30px;font-size:.8rem;border-width:1px;box-shadow:none}
+.task-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:6px}
+.task-toggle{grid-column:1/-1;width:100%;min-height:64px;display:flex;align-items:center;gap:12px;text-align:left;padding:12px 14px;overflow-wrap:anywhere}
+.task-toggle small{display:block;margin-top:3px}
+.task-check{width:24px;height:24px;flex:0 0 24px;border:2px solid var(--accent);border-radius:7px;display:grid;place-items:center;line-height:1}
+.task-toggle[aria-pressed="true"]{background:#e7efef}
+.task-toggle[aria-pressed="true"] .task-check{background:var(--accent);color:white}
+.seen-task{grid-column:2;font-size:.85rem}
+
+.fitted-tasks{display:grid;gap:6px}
+.fitted-tasks .task-toggle{grid-column:1;height:var(--task-height);min-height:0;padding:4px 9px;gap:8px;overflow:auto}
+.fitted-tasks .task-toggle>span:last-child{min-width:0;max-height:100%}
+.fitted-tasks .task-toggle strong{display:block;line-height:1.1}
+.fitted-tasks .task-toggle small{line-height:1.05}
+.fitted-tasks .seen-task{padding-inline:7px}
+.task-pages{margin-top:8px}
+main:has(.fitted-tasks){padding-bottom:68px}
+main:has(.fitted-tasks) .list-head{margin-bottom:10px}
+
+#attendeeField{border:0;margin:12px 0;padding:0;min-width:0}
+#attendeeField legend{font-weight:650;font-size:.9rem;padding:0;margin-bottom:6px}
+#attendeeChoices{display:flex;flex-wrap:wrap;gap:6px}
+.attendee-choice{display:flex;align-items:center;gap:5px;padding:5px 8px;font-size:.85rem}
+.attendee-choice[aria-pressed="true"]{background:#eaf4f1;border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.attendee-choice[aria-pressed="true"]::after{content:"✓";color:var(--accent)}
+.attendee-choice .avatar,.event-people .avatar{width:26px;font-size:.75rem;border:0;box-shadow:none}
+button.event-line{border-block:0;border-inline-end:0;width:100%;text-align:left;border-radius:0;font-weight:inherit}
+.event-copy{min-width:0;flex:1;overflow-wrap:anywhere}
+.event-people{margin-inline-start:auto;display:flex;flex-wrap:wrap;justify-content:flex-end;gap:4px;max-width:68px}
+/* Calendar colors are independent of participant profile colors. */
+:root{--family-color:#f4c638}
+.family-key{display:inline-flex;align-items:center;gap:6px;margin-top:6px;color:var(--muted);font-size:.84rem;font-weight:650}
+.family-key::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--family-color)}
+
+.profile-picker{position:relative;display:block;width:min(100%,500px);height:auto;aspect-ratio:1;margin:12px auto}
+.profile-picker .profile{position:absolute;left:var(--x);top:var(--y);transform:translate(-50%,-50%);width:30%;padding:3px}
+.profile-picker .avatar{width:clamp(50px,15vw,90px)}
+.profile-picker .profile strong{font-size:clamp(.74rem,3.1vw,1rem)}
+.profile-picker .profile small{line-height:1}
+.shop-form{display:flex;flex-wrap:wrap;align-items:end;gap:8px;margin:16px 0}
+.shop-form label{margin:0;flex:1 1 130px}
+.shop-form label.shop-quantity{flex:0 1 100px}
+.shop-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,95px),1fr));gap:8px;margin:10px 0 18px}
+.shop-tile{display:grid;align-content:center;justify-items:center;gap:3px;min-height:80px;text-align:center;overflow-wrap:anywhere;font-size:.9rem}
+.shop-tile span:first-child{font-size:1.65rem;line-height:1.2}
+.shop-tile small{line-height:1.2}
+.shop-open{background:#eaf4f1;border-color:#9ebfb8}
+.shop-bought{background:#edf0f2}
+.shop-tabs{margin:16px 0 10px}
+.shop-tabs button[aria-pressed="true"]{background:var(--accent);color:white}
+.shop-category{margin-top:14px}
+
+.shop-list{grid-template-columns:repeat(auto-fill,minmax(min(100%,128px),1fr))}
+.shop-list .shop-tile{min-height:92px}
+.shop-list[data-density="medium"]{grid-template-columns:repeat(auto-fill,minmax(min(100%,94px),1fr));gap:6px}
+.shop-list[data-density="medium"] .shop-tile{min-height:74px;padding:5px;font-size:.85rem}
+.shop-list[data-density="high"]{grid-template-columns:repeat(auto-fill,minmax(min(100%,72px),1fr));gap:5px}
+.shop-list[data-density="high"] .shop-tile{min-height:60px;padding:4px;font-size:.75rem}
+.shop-list[data-density="high"] .shop-tile span:first-child{font-size:1.25rem}
+#screen details{margin-top:8px}
+#screen summary{padding:9px 0;min-height:44px;cursor:pointer;font-weight:650}
+
+:root{--ink:#19243b;--muted:#4d5c72;--accent:#284bb0;--line:#d5ddea;--canvas:#f3f6fc}
+body{font-family:Inter,system-ui,sans-serif;background:radial-gradient(ellipse at 50% 2%,#e1eaff,transparent 36rem),var(--canvas);min-height:100dvh}
+header{align-items:baseline}
+h1{font-size:clamp(1.15rem,4vw,1.55rem);letter-spacing:-.045em}
+header small{text-align:right}
+.profile-picker{width:min(100%,480px);max-width:none;isolation:isolate;margin:12px auto 6px}
+.profile-picker::before{content:"";position:absolute;z-index:-1;inset:15%;border:1px solid #aabce2;border-radius:50%;background:radial-gradient(circle,#eaf0ff,transparent 67%)}
+.profile-picker .profile{width:32%;gap:3px;line-height:1.2}
+.profile-picker .profile>span:last-child{font-size:.73rem}
+.profile-picker .avatar{width:clamp(52px,15vw,94px);border-color:#f8faff;box-shadow:0 5px 15px #223d692e}
+.profile-nav{margin-top:8px}
+.profile-nav button{background:#ffffffcf}
+.hub-icon{display:block;position:relative;width:24px;height:21px;border:2px solid currentColor;border-radius:4px}
+.hub-icon-calendar::before{content:"";position:absolute;inset:4px 0 auto;border-top:2px solid}
+.hub-icon-calendar::after{content:"";position:absolute;top:-5px;left:4px;width:10px;height:6px;border-inline:2px solid}
+.hub-icon-basket{height:15px;margin-top:5px}
+.hub-icon-basket::before{content:"";position:absolute;top:-10px;left:4px;width:10px;height:8px;border:2px solid;border-bottom:0;border-radius:8px 8px 0 0}
+.new{border-radius:999px;box-shadow:0 6px 20px #284bb04d}
+.month-toolbar,.shop-open,.task-toggle[aria-pressed="true"]{background:#e8efff}
+.shop-open{border-color:#a2b7e6}
+dialog{box-shadow:0 16px 60px #18233b45}
+@media(prefers-reduced-motion:no-preference){
+  button{transition:background-color .15s,border-color .15s,box-shadow .15s}
+  .profile-picker .avatar{transition:scale .15s,box-shadow .15s}
+  .profile-picker .profile:active .avatar{scale:.93}
+  .shop-tile:active{scale:.98}
+}
+@media(max-width:420px){
+  header{gap:5px;flex-wrap:wrap;margin-bottom:14px}
+  .profile-picker .profile strong{font-size:clamp(.68rem,3.1vw,.9rem)}
+  .profile-nav button{padding-inline:10px}
+}
+.product-icon svg{display:block;width:1.55em;height:1.55em}
+
+main:has(.profile-picker){max-width:1080px}
+.profile-picker .profile{transition:left .22s ease,top .22s ease}
+@media(min-width:700px){
+  .profile-picker{width:min(100%,960px,calc(100svh - 190px))}
+  .profile-picker .avatar{width:clamp(104px,13vw,144px)}
+  .profile-picker .profile strong{font-size:1.15rem}
+  .profile-picker .hub-icon{scale:1.25}
+}
+@media(max-width:699px){
+  .profile-picker{touch-action:pan-y}
+}
+@media(prefers-reduced-motion:reduce){
+  .profile-picker .profile{transition:none}
+}
+
+.profile-picker{--hub-size:clamp(52px,15vw,94px)}
+.profile-picker::before{inset:13% 17% 21%}
+.profile-picker .profile,.profile-picker .profile:active{
+  transform:translate(-50%,calc(var(--hub-size) / -2));
+  padding-block:0;
+}
+.profile-picker .avatar{width:var(--hub-size);height:var(--hub-size)}
+@media(min-width:700px){
+  .profile-picker{--hub-size:clamp(90px, min(13vw,16svh),144px)}
+}
+
+.fitted-tasks .task-toggle{
+  background:#edf3ff;border:2px solid #647da7;color:#182d50;
+  touch-action:manipulation;
+}
+.fitted-tasks .task-toggle[aria-pressed="true"]{
+  background:#d9eadf;border-color:#52765e;color:#193e29;
+}
+.fitted-tasks .task-toggle[aria-pressed="true"] small{color:#305940}
+.fitted-tasks .task-toggle[aria-pressed="true"] .task-check{background:#24603d;border-color:#24603d}
+.fitted-tasks .task-toggle:active{transform:none;box-shadow:inset 0 0 0 2px currentColor}
+
+main:has(.profile-picker){max-width:1250px}
+main:has(.profile-picker)>header{display:none}
+.profile-picker{width:min(100%,560px);margin:4px auto 0}
+.hub-title{
+  position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);
+  width:42%;text-align:center;font-size:clamp(1.1rem,4.8vw,2.8rem);
+  line-height:1.1;pointer-events:none;
+}
+.app-version{text-align:center;margin-top:16px}
+@media(min-width:700px){
+  .profile-picker{width:min(100%,1080px, max(420px, calc(100svh - 140px)))}
+  .profile-picker{--hub-size:clamp(104px,min(15vw,20svh),168px)}
+}
+main:has(.fitted-tasks) .app-version{margin-top:4px}
+
+.profile-picker .profile>.shopping-count{
+  position:absolute;top:calc(var(--hub-size) * .15);left:calc(50% + var(--hub-size) * .35);
+  transform:translate(-50%,-50%);
+  min-width:1.5rem;height:1.5rem;padding:0 .28rem;
+  display:grid;place-items:center;border-radius:999px;
+  border:2px solid white;background:#174b3c;color:white;
+  font-size:.75rem;font-weight:750;line-height:1;
+  pointer-events:none;
+}
+main:has(.profile-picker){
+  min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;
+  padding-bottom:calc(max(18px,env(safe-area-inset-bottom)) + 56px);
+}
+main:has(.profile-picker)>#screen{flex:1;display:flex;flex-direction:column}
+main:has(.profile-picker) .profile-picker{margin:auto auto;flex:none}
+main:has(.profile-picker) .profile-nav{margin:12px 0 0}
+main:has(.profile-picker) .app-version{margin-top:6px}
+@media(display-mode:standalone){
+  main{padding-top:calc(20px + env(safe-area-inset-top,0px))}
+  main:has(.profile-picker){padding-top:calc(20px + env(safe-area-inset-top,0px))}
+}
+.shift-menu{margin:8px 0 12px}
+.shift-menu summary{width:fit-content;padding:10px 0;cursor:pointer;font-weight:650}
+@media(max-width:699px) and (orientation:portrait) and (min-height:540px){
+  main:has(.calendar-view){height:100dvh;padding-top:calc(4px + env(safe-area-inset-top,0px));padding-bottom:calc(68px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column}
+  main:has(.calendar-view)>header{display:none}
+  main:has(.calendar-view)>#screen,.calendar-view{display:flex;flex-direction:column;flex:1;min-height:0}
+  #screen:has(.calendar-view)>.back{align-self:flex-start;margin:0;flex:none}
+  .calendar-header{gap:6px;margin-bottom:4px}
+  .calendar-header h2{font-size:clamp(1.2rem,5.5vw,1.65rem)}
+  .shift-menu{margin:0 0 4px}
+  .shift-menu summary{padding:4px 0}
+  .calendar-view>[role="status"]{font-size:.78rem}
+  .month-toolbar{padding:3px 6px;gap:4px}
+  .weekday{padding:3px 0}
+  .month-day,.month-blank{min-height:clamp(28px,4.7dvh,44px)}
+  .day-number{width:23px;height:23px}
+  .day-dots{min-height:4px}
+  .day-dots i{width:4px;height:4px}
+  main:has(.calendar-view) .app-version{margin-top:3px}
+  .calendar-view:has(.shift-menu[open]){overflow:auto}
+}
+.calendar-legend{display:flex;gap:4px 12px;flex-wrap:wrap}
+.family-key::before,.day-dots i{background:var(--event-color,var(--family-color))}
+.event-line{border-inline-start-color:var(--event-color,var(--family-color))}
+.shopping-item{display:grid;gap:4px;min-width:0}.shopping-item>button:last-child{font-size:.72rem;padding:4px 6px;min-height:32px}.settings input[type=checkbox]{width:24px;min-height:24px}
+#screen .settings-panel > summary{padding:12px clamp(18px,4vw,24px);min-height:48px}
+.settings-panel > div{padding:8px clamp(18px,4vw,24px) 16px}
+body[data-custom-background]{isolation:isolate}
+body[data-custom-background]::before{
+  content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:var(--design-background) center / cover no-repeat;
+  opacity:var(--design-strength);
+}
+.design-choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(112px,45%),1fr));gap:8px;margin-block:10px 16px}
+.design-choice{display:grid;gap:5px;align-content:start;min-width:0;padding:6px;text-align:left;font-size:.8rem}
+.design-choice[aria-pressed=true]{box-shadow:inset 0 0 0 2px var(--accent)}
+.design-swatch{display:block;height:34px;border:1px solid #19243b18;border-radius:6px;background:var(--swatch)}
+.settings input.design-strength{padding:0;accent-color:var(--accent);touch-action:pan-y}
+.design-status{margin-top:8px}
+
+.calendar-help{font-size:.9rem;color:var(--muted);margin-bottom:10px}
+.calendar-view{background:#f8fafc;border-radius:18px;padding:14px}
+.week-grid .month-day{min-height:88px;padding:8px 2px;display:flex;flex-direction:column;align-items:center;gap:5px}
+.week-label,.week-count{font-size:.75rem}
+.week-grid .day-dots{display:none}
+.month-day[aria-current=date]{outline:2px solid var(--accent);outline-offset:-3px}
+.selected-agenda{margin-top:16px;display:grid;gap:12px}
+.selected-agenda .task-group{margin:0}
+.selected-agenda>.primary{justify-self:start}
+.event-line{min-height:64px;text-align:left;gap:12px}
+#calendarExtras{border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin:16px 0}
+#calendarExtras summary{min-height:44px;cursor:pointer;font-weight:650}
+#editor form>label,#editor form>fieldset{margin:16px 0}
+#editor .bar:last-child{position:sticky;bottom:0;background:white;padding-top:12px}
+@media(max-width:699px){
+  main:has(.calendar-view){height:auto;min-height:100dvh}
+  .calendar-view{padding:10px}
+  .week-grid .month-day{min-height:82px}
+  .selected-agenda{max-height:45dvh;overflow:auto;padding-bottom:4px}
+  .calendar-legend{font-size:.8rem}
+  .month-toolbar{padding:8px}
+  .month-toolbar .bar{width:100%;justify-content:space-between}
+}
+
+.task-filters{margin-bottom:14px}
+.task-filters [aria-pressed=true]{background:var(--accent);color:white}
+.shopping-view{background:#f8fafc;padding:14px;border-radius:18px}
+.shopping-view .shop-form{align-items:end;gap:12px}
+.quantity-controls{display:flex;gap:8px}
+.quantity-controls button{width:48px;min-height:48px;font-size:1.4rem}
+.shopping-view .shop-form label.shop-quantity{flex:1 1 130px}
+.shopping-view .shop-tile{min-height:100px;font-size:1rem}
+.shopping-view .shop-list .shop-tile{border-width:2px}
+.shopping-view .shop-bought{border-style:dashed}
+.shopping-view details{margin-top:16px}
+.shopping-view summary{min-height:48px}
+#actionFeedback{position:fixed;z-index:10;left:50%;bottom:80px;transform:translateX(-50%);width:max-content;max-width:calc(100% - 32px);padding:12px 18px;background:#fff;color:#19243b;border:2px solid #284bb0;border-radius:12px;box-shadow:0 3px 12px #19243b20}
+@media(max-width:699px){
+ .shopping-view{padding:10px}
+ .shopping-view .shop-form>label:first-child{flex-basis:100%}
+}
+
+.calendar-view > .shift-menu{margin-top:18px;width:100%;flex:none}
+#screen .shift-menu.settings-panel > summary{width:auto;font-size:.9rem}
+.shift-menu form input{max-width:100%;min-width:0}
+.shift-menu form label{max-width:100%;min-width:0}
+.shift-menu form button{white-space:normal}
+
+#editor form > label.all-day{display:flex;align-items:center;gap:12px;min-height:48px;cursor:pointer}
+#editor .all-day input{width:26px;height:26px;min-height:26px;flex:none;margin:0;padding:0;accent-color:var(--accent)}
+
+.route-label{display:grid;gap:6px;margin:16px 0;font-weight:650}
+.route-label select{font:inherit;min-height:48px;width:100%;padding:8px 12px;background:white;border:1px solid var(--line);border-radius:12px;color:var(--ink)}
+.shopping-group-title{grid-column:1 / -1;margin-top:10px}
+.route-row{display:grid;grid-template-columns:minmax(0,1fr) 48px 48px;align-items:center;gap:8px;margin:8px 0}
+.route-row button{padding:6px;min-height:48px}
+.route-settings p{font-size:.85rem;margin-bottom:12px;color:var(--muted)}
+
+.profile-picker .profile.my-profile .avatar{
+  width:calc(var(--hub-size) * 1.14);height:calc(var(--hub-size) * 1.14);
+  border-color:var(--accent);box-shadow:0 4px 16px #223d692e;
+}
+.profile-picker .profile.my-profile,.profile-picker .profile.my-profile:active{
+  transform:translate(-50%,calc(var(--hub-size) * -.57));
+}
+.profile-picker .profile.my-profile strong{font-size:clamp(.8rem,3.45vw,1.15rem)}
+@media(min-width:700px){
+  .profile-picker .profile.my-profile strong{font-size:1.3rem}
+}
+.settings-panel select{font:inherit;width:100%;min-height:48px;padding:8px 12px;background:white;color:var(--ink);border:1px solid var(--line);border-radius:10px}
+</style></head><body><main><header><h1>The 4 Werhans</h1></header><section id="screen"></section><footer class="app-version"><small>V54 · Lokale Daten und Kalenderabgleich</small></footer><button class="new" id="add">＋ Neu</button></main>
+<dialog id="dayDialog" aria-labelledby="dayTitle">
+<div class="day-dialog-header"><h2 id="dayTitle"></h2><button type="button" id="closeDay" autofocus>Schließen</button></div>
+<div id="dayEvents" class="task-group"></div>
+<div><button type="button" id="newDayEvent" class="primary">+ Neuer Termin</button></div>
+</dialog>
+<dialog id="editor"><form id="form"><h2 id="editorTitle">Neuer Eintrag</h2><label id="kindLabel">Art<select id="kind"><option>Aufgabe</option><option>Termin</option></select></label><label>Titel<input id="titleInput" required maxlength="120"></label><label id="whoLabel">Für wen?<select id="who"></select></label><label class="date-field"><span id="dayCaption">Fällig am (optional)</span><input type="date" id="day"></label><label id="allDayLabel" class="all-day" hidden><input id="allDay" type="checkbox">Ganztägig</label><fieldset id="attendeeField" hidden><legend>Wer nimmt an diesem Termin teil?</legend><div id="attendeeChoices"></div></fieldset><fieldset id="timeLabel" hidden><legend>Uhrzeit (optional)</legend>
+<input type="text" id="clock" inputmode="numeric" maxlength="5" placeholder="z. B. 0930" aria-label="Uhrzeit in Stunden und Minuten" autocomplete="off">
+<div class="minute-buttons" aria-label="Minuten auswählen">
+<button type="button" data-minute="00">:00</button><button type="button" data-minute="15">:15</button><button type="button" data-minute="30">:30</button><button type="button" data-minute="45">:45</button>
+</div></fieldset>
+<section id="reminderField" hidden>
+<label>Erinnerung<select id="reminder"><option value="">Keine</option><option value="5">5 Minuten vorher</option><option value="15">15 Minuten vorher</option><option value="30">30 Minuten vorher</option><option value="60">1 Stunde vorher</option><option value="120">2 Stunden vorher</option><option value="1440">1 Tag vorher</option><option value="2880">2 Tage vorher</option><option value="custom">Eigene Vorlaufzeit</option></select></label>
+<label id="calendarScopeLabel">Kalender<select id="calendarScope"><option value="private">Privat</option><option value="family">Family</option><option value="couple">Matze &amp; Sindy</option></select><small>Selbst angelegte Termine liegen derzeit auf diesem Gerät.</small></label><div id="customReminder" hidden><label>Vorlauf<input id="reminderAmount" type="number" min="1" max="99999" step="1" inputmode="numeric" value="1"></label><label>Einheit<select id="reminderUnit"><option value="1">Minuten</option><option value="60">Stunden</option><option value="1440">Tage</option></select></label></div>
+<small>Die Einstellung wird gespeichert. Push ist noch nicht aktiv.</small>
+</section><div class="bar"><button type="button" id="cancel">Abbrechen</button><button class="primary">Speichern</button></div></form></dialog>
+<button id="frame" hidden aria-label="Zur Profilauswahl"><img id="slide" alt=""></button>
+<script>
+const names=['Matze','Sindy','Philipp','Robin'], colors=['#bedbff','#f7c8b9','#f6dc91','#c7e5b7'];
+const el=id=>document.getElementById(id), screen=el('screen'), editor=el('editor');
+const state=JSON.parse(localStorage.getItem('familienplaner-v1')||'null')||{items:[],avatars:{},wait:300,interval:30};
+const exampleIndex=state.items.findIndex(item=>item.id===1&&item.kind==='Aufgabe'&&item.title==='Hunde füttern'&&item.who==='Robin');
+if(exampleIndex!==-1){
+  state.items.splice(exampleIndex,1);
+  save();
+}
+let view='home', undo, idle, ticker, photos=[];
+function save(){localStorage.setItem('familienplaner-v1',JSON.stringify(state))}
+function node(tag,txt,parent=screen){const n=document.createElement(tag);if(txt)n.textContent=txt;parent.append(n);return n}
+function button(txt,fn,parent=screen){const b=node('button',txt,parent);b.onclick=fn;return b}
+function go(next){
+  view=next;taskPage=0;render();reset();
+  if(next==='home'||next==='shopping')refreshShopping();
+  if(next==='calendar')refreshShared();
+  if(next==='calendar'&&dayforceKey)refreshDayforce(dayforceKey);
+}
+function avatar(name,parent){
+  const photo=state.avatars[name];
+  const icon=node('span',photo?'':name[0],parent);
+  icon.className='avatar';
+  icon.style.setProperty('--c',colors[names.indexOf(name)]);
+  icon.setAttribute('aria-hidden','true');
+  if(photo){const img=node('img','',icon);img.src=photo;img.alt=''}
+}
+function dateLabel(day){
+  return day ? new Intl.DateTimeFormat('de-DE',{day:'numeric',month:'short',year:'numeric'}).format(new Date(day+'T12:00:00')) : '';
+}
+const deviceProfileKey='werhans-device-profile-v1';
+let deviceProfile='';
+try{
+  const stored=localStorage.getItem(deviceProfileKey);
+  if(names.includes(stored))deviceProfile=stored;
+}catch{}
+function renderDeviceProfileSettings(area){
+  const section=settingsPanel('Mein Profil',area);
+  const label=node('label','Wer nutzt dieses Gerät?',section);
+  const select=node('select','',label);
+  const shared=node('option','Gemeinsam genutzt',select);shared.value='';
+  for(const name of names){const option=node('option',name,select);option.value=name;}
+  select.value=deviceProfile;
+  node('small','Das ausgewählte Profil erscheint auf der Startseite größer. Die Auswahl gilt für dieses Gerät.',section);
+  const status=node('p','',section);status.setAttribute('role','status');
+  select.onchange=()=>{
+    const previous=deviceProfile;
+    try{
+      localStorage.setItem(deviceProfileKey,select.value);
+      deviceProfile=select.value;
+      status.textContent=deviceProfile?'Profil für dieses Gerät gespeichert.':'Gemeinsame Nutzung gespeichert.';
+    }catch{
+      select.value=previous;
+      status.textContent='Die Auswahl konnte auf diesem Gerät nicht gespeichert werden.';
+    }
+  };
+}
+let taskPage=0;
+let taskFilter='Offen';
+function showFeedback(message){
+  let status=el('actionFeedback');
+  if(!status){
+    status=node('p','',document.body);status.id='actionFeedback';status.setAttribute('role','status');
+  }
+  status.textContent=message;status.hidden=false;
+  clearTimeout(showFeedback.timer);
+  showFeedback.timer=setTimeout(()=>{status.hidden=true},5000);
+}
+function taskRow(item,parent){
+  const done=item.status==='Erledigt';
+  const row=node('div','',parent);
+  row.className='task-row';
+  function update(status){
+    undo={item,status:item.status};
+    if(status==='Erledigt')item.previousStatus=item.status;
+    item.status=status;
+    save();
+    render();
+    showFeedback(status==='Erledigt'?'Aufgabe erledigt.':'Aufgabe wieder offen.');
+    screen.querySelectorAll('.task-toggle').forEach(control=>{
+      if(control.dataset.taskId===String(item.id))control.focus({preventScroll:true});
+    });
+  }
+  const toggle=button('',()=>update(done?(item.previousStatus||'Offen'):'Erledigt'),row);
+  toggle.className='task-toggle';
+  toggle.dataset.taskId=String(item.id);
+  toggle.setAttribute('aria-pressed',String(done));
+  node('span',done?'✓':'',toggle).className='task-check';
+  const copy=node('span','',toggle);
+  node('strong',item.title,copy);
+  const detail=[view==='all'?item.who:'',done?'Erledigt':'',item.day?'Fällig am '+dateLabel(item.day):'',item.status==='Gesehen'?'Gesehen':''].filter(Boolean).join(' · ');
+  if(detail)node('small',detail,copy);
+  if(!done&&item.status!=='Gesehen')button('Gesehen',()=>update('Gesehen'),row).className='seen-task';
+}
+let profileRotation=0;
+function render(){
+  el('add').hidden=view==='shopping';
+  screen.replaceChildren();
+  if(view==='home'){
+    const grid=node('div');
+    grid.className='grid profile-picker';
+    node('h1','The 4 Werhans',grid).className='hub-title';
+    const positions=Array.from({length:6},(_,index)=>{
+      const angle=(index*60-120)*Math.PI/180;
+      return [50+33*Math.cos(angle),46+33*Math.sin(angle)];
+    });
+    const circles=[];
+    function positionCircle(control,index){
+      const [x,y]=positions[(index+profileRotation)%positions.length];
+      control.style.setProperty('--x',x+'%');
+      control.style.setProperty('--y',y+'%');
+    }
+    function circle(action,index){
+      const control=button('',action,grid);
+      control.className='profile';
+      circles[index]=control;
+      positionCircle(control,index);
+      return control;
+    }
+    let swipeStart=null;
+    let suppressTapUntil=0;
+    grid.addEventListener('touchstart',event=>{
+      swipeStart=null;
+      if(event.touches.length!==1||!window.matchMedia('(max-width:699px)').matches)return;
+      const touch=event.touches[0];
+      swipeStart={x:touch.clientX,y:touch.clientY,id:touch.identifier};
+    },{passive:true});
+    grid.addEventListener('touchcancel',()=>{swipeStart=null},{passive:true});
+    grid.addEventListener('touchend',event=>{
+      const start=swipeStart;
+      swipeStart=null;
+      if(!start)return;
+      const touch=Array.from(event.changedTouches).find(item=>item.identifier===start.id);
+      if(!touch)return;
+      const dx=touch.clientX-start.x;
+      const dy=touch.clientY-start.y;
+      if(Math.abs(dx)<32||Math.abs(dx)<=Math.abs(dy))return;
+      if(event.cancelable)event.preventDefault();
+      suppressTapUntil=performance.now()+350;
+      const center=grid.getBoundingClientRect();
+      const direction=(dx>0)===(start.y<center.top+center.height/2)?1:-1;
+      profileRotation=(profileRotation+positions.length+direction)%positions.length;
+      circles.forEach(positionCircle);
+    },{passive:false});
+    grid.addEventListener('click',event=>{
+      if(event.detail&&performance.now()<suppressTapUntil){
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    },true);
+    for(const [index,name] of names.entries()){
+      const b=circle(()=>go(name),name==='Robin'?5:index);
+      if(name===deviceProfile){b.classList.add('my-profile');b.setAttribute('aria-label',name+' · Mein Profil');}
+      avatar(name,b);
+      node('strong',name,b);
+      const count=state.items.filter(x=>x.who===name&&x.status!=='Erledigt').length;
+      node('span',count+' offen',b);
+    }
+    for(const [index,label,target,icon,color] of [
+      [4,'Einkaufsliste','shopping','basket','#b4ebe0'],
+      [3,'Kalender','calendar','calendar','#dcd5ff']
+    ]){
+      const b=circle(()=>go(target),index);
+      const badge=node('span','',b);
+      node('i','',badge).className='hub-icon hub-icon-'+icon;
+      badge.className='avatar';
+      badge.style.setProperty('--c',color);
+      badge.setAttribute('aria-hidden','true');
+      node('strong',label,b);
+      if(target==='shopping'){
+        const count=displayedShopping().filter(item=>!item.done).length;
+        node('span',String(count),b).className='shopping-count';
+        b.setAttribute('aria-label',label+', '+count+(count===1?' offener Artikel':' offene Artikel'));
+      }
+    }
+    const nav=node('nav');
+    nav.className='bar profile-nav';
+    button('Alle Aufgaben',()=>go('all'),nav);
+    button('Einstellungen',()=>go('settings'),nav);
+    return;
+  }
+  button('‹ Zur Profilauswahl',()=>go('home')).className='back';
+  const area=node('section');
+  if(view==='settings'){area.className='settings';
+  node('h2','Einstellungen',area);renderDeviceProfileSettings(area);renderSyncSettings(area);renderShoppingSettings(area);renderDesignSettings(area);const profiles=settingsPanel('Profilbilder',area);for(const name of names){const l=node('label',name,profiles);const f=node('input','',l);f.type='file';f.accept='image/*';f.onchange=async()=>{if(!f.files[0])return;try{state.avatars[name]=await resize(f.files[0],240);save()}catch{alert('Dieses Foto konnte nicht gespeichert werden.')}}}const slides=settingsPanel('Bilderrahmen',area);const label=node('label','Fotos für den Bilderrahmen (bis zu 100)',slides);const upload=node('input','',label);upload.type='file';upload.accept='image/*';upload.multiple=true;const count=node('small',photos.length+' Fotos · für diese Sitzung',slides);upload.onchange=()=>{if(!upload.files.length)return;photos.forEach(URL.revokeObjectURL);photos=Array.from(upload.files).slice(0,100).map(f=>URL.createObjectURL(f));count.textContent=photos.length+' Fotos · für diese Sitzung';reset()};
+for(const [key,label] of [['wait','Start nach Sekunden (0 = aus)'],['interval','Bildwechsel nach Sekunden']]){const l=node('label',label,slides),i=node('input','',l);i.type='number';i.min=key==='wait'?0:1;i.value=state[key];i.onchange=()=>{if(i.value!==''&&i.checkValidity()){state[key]=Number(i.value);save();reset()}else i.value=state[key]}}button('Diashow testen',()=>photos.length?showFrame():alert('Wähle zuerst Fotos aus.'),slides);return}
+
+  if(view==='calendar'){area.className='calendar-view';renderCalendar(area);return}
+  if(view==='shopping'){renderShopping(area);return}
+  const head=node('div','',area);head.className='list-head';
+  node('h2',view==='all'?'Alle Aufgaben':view+' · Aufgaben',head);
+  const doneCount=state.items.filter(item=>item.kind==='Aufgabe'&&(view==='all'||item.who===view)&&item.status==='Erledigt').length;
+  node('small',doneCount+' erledigt',head);
+  const filters=node('div','',area);filters.className='bar task-filters';
+  for(const status of ['Offen','Erledigt']){
+    const control=button(status,()=>{taskFilter=status;taskPage=0;render()},filters);
+    control.setAttribute('aria-pressed',String(taskFilter===status));
+  }
+  const tasks=state.items.filter(item=>item.kind==='Aufgabe'&&(view==='all'||item.who===view)&&(taskFilter==='Erledigt'?item.status==='Erledigt':item.status!=='Erledigt'))
+    .sort((a,b)=>(a.day||'9999').localeCompare(b.day||'9999'));
+  const list=node('div','',area);
+  list.className='fitted-tasks';
+  taskViewportWidth=document.documentElement.clientWidth;
+  const height=taskViewportHeight=Math.round(window.visualViewport?.height||window.innerHeight);
+  const remaining=Math.floor(height-(list.getBoundingClientRect().top+window.scrollY)-132);
+  const capacity=Math.max(1,Math.floor(remaining/62));
+  const pages=Math.max(1,Math.ceil(tasks.length/capacity));
+  taskPage=Math.min(taskPage,pages-1);
+  const shown=tasks.slice(taskPage*capacity,(taskPage+1)*capacity);
+  list.style.setProperty('--task-height',Math.min(112,Math.max(56,Math.floor(remaining/Math.max(1,shown.length))-6))+'px');
+  for(const item of shown)taskRow(item,list);
+  if(!shown.length)node('p',taskFilter==='Offen'?'Keine offenen Aufgaben.':'Noch keine erledigten Aufgaben.',list).className='empty';
+  const controls=node('div','',area);controls.className='bar task-pages';
+  if(pages>1){
+    button('‹',()=>{taskPage--;render();screen.querySelector('.next-page')?.focus()},controls).disabled=taskPage===0;
+    node('span',(taskPage+1)+' / '+pages,controls);
+    const next=button('›',()=>{taskPage++;render();screen.querySelector('.prev-page')?.focus()},controls);
+    next.className='next-page';next.disabled=taskPage===pages-1;
+    next.setAttribute('aria-label','Nächste Aufgabenseite');
+    controls.firstElementChild.className='prev-page';
+    controls.firstElementChild.setAttribute('aria-label','Vorherige Aufgabenseite');
+  }
+  if(undo)button('Letzte Änderung rückgängig',()=>{undo.item.status=undo.status;undo=null;save();render()},controls);
+
+}
+const groceryCatalog=Object.entries({
+  'Obst': '🍎 Apfel|🍐 Birne|🍌 Banane|🍊 Orange|🍋 Zitrone|🍋‍🟩 Limette|🍇 Trauben|🍓 Erdbeeren|🫐 Heidelbeeren|🍒 Kirschen|🍑 Pfirsich|🍍 Ananas|🥭 Mango|🥝 Kiwi|🍉 Wassermelone|🍈 Honigmelone|🥥 Kokosnuss|🍊 Mandarinen|🍑 Nektarine|🍎 Pflaumen',
+  'Gemüse': '🥕 Karotten|🥔 Kartoffeln|🍅 Tomaten|🥒 Gurke|🫑 Paprika|🥦 Brokkoli|🥬 Salat|🥬 Spinat|🥦 Blumenkohl|🍆 Aubergine|🥒 Zucchini|🍄 Champignons|🧅 Zwiebeln|🧄 Knoblauch|🌽 Mais|🥑 Avocado|🎃 Kürbis|🌶️ Chili|🌱 Kräuter|🥬 Lauch|🥬 Kohl|🥕 Radieschen|🌱 Spargel|🫛 Erbsen|🫛 Bohnen',
+  'Brot & Backwaren': '🍞 Brot|🥖 Baguette|🥐 Croissants|🥨 Brezeln|🥯 Brötchen|🍞 Toast|🫓 Wraps|🍰 Kuchen|🧁 Muffins',
+  'Kühlregal': '🥛 Milch|🥛 Haferdrink|🧀 Käse|🧀 Mozzarella|🧀 Parmesan|🧈 Butter|🥚 Eier|🥛 Sahne|🥣 Joghurt|🥣 Quark|🥣 Frischkäse|🥛 Schmand|🧈 Margarine|🧀 Feta',
+  'Fleisch & Fisch': '🍗 Hähnchen|🥩 Hackfleisch|🥩 Rindfleisch|🥓 Speck|🌭 Würstchen|🍖 Schinken|🐟 Lachs|🐟 Fisch|🦐 Garnelen|🥓 Salami|🥩 Schnitzel|🐟 Thunfisch',
+  'Vorrat': '🍝 Nudeln|🍚 Reis|🌾 Mehl|🧂 Salz|🧂 Pfeffer|🍬 Zucker|🫙 Öl|🫙 Essig|🥫 Dosentomaten|🥫 Tomatenmark|🥫 Linsen|🥫 Kichererbsen|🥫 Brühe|🥣 Müsli|🥣 Cornflakes|🌾 Haferflocken|🫙 Marmelade|🍯 Honig|🥜 Nüsse|🍫 Schokolade|🍪 Kekse|🍿 Chips|🥫 Ketchup|🫙 Senf|🥫 Pesto|🥫 Sojasauce|🌾 Backpulver|🌾 Hefewürfel',
+  'Tiefkühl': '🍕 TK-Pizza|🍟 Pommes|🍦 Eis|🥦 TK-Gemüse|🫐 TK-Beeren|🐟 Fischstäbchen',
+  'Getränke': '💧 Wasser|🧃 Saft|☕ Kaffee|🍵 Tee|🥤 Limonade|🍺 Bier|🍷 Wein|🧃 Apfelschorle',
+  'Haushalt & Tiere': '🧻 Toilettenpapier|🧻 Küchenrolle|🧼 Seife|🧴 Spülmittel|🧺 Waschmittel|🗑️ Müllbeutel|🪥 Zahnpasta|🧽 Schwämme|🐶 Hundefutter|🐱 Katzenfutter'
+}).map(([category,entries])=>[category,entries.split('|').map(entry=>{
+  const split=entry.indexOf(' ');
+  return {icon:entry.slice(0,split),title:entry.slice(split+1)};
+})]);
+const groceryItems=groceryCatalog.flatMap(([,entries])=>entries);
+function groceryKey(title){
+  return title.trim().replace(/\s+/g,' ').toLocaleLowerCase('de-DE');
+}
+const groceryIcons={
+  'cornflakes':'<path fill="#f5c04f" d="M13 9h30l8 6v43H13Z"/><path fill="#df912f" d="m43 9 8 6v43h-8Z"/><path fill="#fff7db" d="M13 20h30v29H13Z"/><path fill="#76a9cc" d="M18 36h20q-2 10-10 10t-10-10Z"/><g fill="#e7aa35" stroke-width="1.3"><ellipse cx="22" cy="33" rx="3" ry="2"/><ellipse cx="28" cy="30" rx="3" ry="2"/><ellipse cx="34" cy="33" rx="3" ry="2"/></g><path d="M20 14h17"/>',
+  'milch':'<g stroke="none"><ellipse cx="32" cy="58" rx="22" ry="3" fill="#193960" opacity=".14"/><path fill="#245eb5" d="M41 22l12-5v34q0 3-3 4l-9 4z"/><path fill="#397fd4" d="M11 20h32v34q0 5-5 5H16q-5 0-5-5z"/><path fill="#82baf2" d="M11 20l11-12h21l10 9-10 6H11z"/><path fill="#edf6ff" d="M13 28h28v21H13z"/><path fill="#fff" d="M24 8V6q0-2 2-2h9q2 0 2 2v7q-7 3-13 0z"/><path d="M27 8v4m4-4v4m3-4v4" stroke="#b7cde5" stroke-width="1"/><path fill="#2360af" d="M27 30c-2 4-7 8-7 12a7 7 0 0 0 14 0c0-4-5-8-7-12z"/><path d="M23 42q0 3 3 4" fill="none" stroke="#cfe9ff" stroke-width="1.5"/></g>',
+  'saft':'<path fill="#f4a53a" d="M26 9h12v12l6 7v27H20V28l6-7Z"/><path fill="#faf2d3" d="M24 6h16v8H24zM20 33h24v15H20z"/><circle cx="32" cy="40" r="5" fill="#f5a837"/>',
+  'limonade':bottlePack('#eedb6f'),
+  'apfelschorle':bottlePack('#9fc872'),
+  'ketchup':'<path fill="#d24d44" d="M26 8h12v10c0 4 9 8 9 15v23H17V33c0-7 9-11 9-15Z"/><path fill="#f5ead9" d="M25 5h14v8H25zM17 34h30v14H17z"/><circle cx="32" cy="41" r="4" fill="#d24d44"/>',
+  'pesto':jar('#6b9954','#ddba60','<path fill="#80a95d" d="M25 44q-4-14 14-14-1 15-14 14Zm0 0 10-10"/>'),
+  'sojasauce':'<path fill="#653b33" d="M25 10h14v11l9 19v15H16V40l9-19Z"/><path fill="#cf554d" d="M22 5h20v10H22z"/><path fill="#f0c77d" d="M20 34h24v12H20z"/><path d="M28 40h8"/>',
+  'brühe':jar('#955b35','#478b56','<path d="M22 38h20q-3 8-10 8t-10-8Zm5-5 2-4m6 4 2-4"/>'),
+  'kichererbsen':can('#eac581','<circle cx="25" cy="34" r="5"/><circle cx="38" cy="35" r="5"/><circle cx="32" cy="44" r="5"/>'),
+  'linsen':'<path fill="#e3c3a0" d="M18 7h28l6 49H12Z"/><path d="M18 12h28M13 51h38"/><g fill="#a66b48"><ellipse cx="24" cy="30" rx="4" ry="3"/><ellipse cx="38" cy="29" rx="4" ry="3"/><ellipse cx="31" cy="38" rx="4" ry="3"/><ellipse cx="41" cy="43" rx="4" ry="3"/><ellipse cx="22" cy="44" rx="4" ry="3"/></g>',
+  'tomatenmark':'<path fill="#df6558" d="m8 14 40 16 3 13-12 6L5 28Z"/><path fill="#f3e7d9" d="m45 44 7-5 6 10-7 5Z"/><path d="m11 16-4 13"/><circle cx="28" cy="31" r="5" fill="#f7c5a7"/>',
+  'dosentomaten':can('#f4a49a','<circle cx="32" cy="39" r="9" fill="#d74d44"/><path stroke="#395b32" d="m25 31 7 3 7-3m-7 3v-6"/>'),
+  'hefewürfel':'<path fill="#ead6ad" d="m8 22 25-12 22 12v25L30 58 8 45Z"/><path fill="#d5b885" d="M30 34 55 22v25L30 58Z"/><path d="M8 22l22 12M19 33l4 2m-8 4 4 2"/>',
+  'schnitzel':'<path fill="#e8ae62" d="M7 35c-2-10 11-22 21-19 8 3 19-6 26 3 8 10-4 29-16 28-11-1-25 7-31-12Z"/><path d="m17 31 2 2m8-10 2 1m7 12 2 2m9-12 2 2m-26 12 2 1"/>',
+  'rindfleisch':'<path fill="#c66668" d="m8 26 14-10 17 4 17 13-10 15-19 3L8 40Z"/><path fill="#e7a4a0" d="m8 26 14-10 17 4 17 13-23 5Z"/><path d="m16 30 14 5m10 7 8-3m-23 4 7 3"/>',
+  'hackfleisch':'<rect x="7" y="16" width="50" height="34" rx="7" fill="#e9e4dd"/><rect x="12" y="21" width="40" height="24" rx="4" fill="#ce7275"/><path d="M17 27q5-4 10 0t10 0 10 0M17 34q5-4 10 0t10 0 10 0m-30 7q5-4 10 0t10 0 10 0"/>'
+};
+function bottlePack(color){
+  const bottle='<path fill="'+color+'" d="M5 9h5v7l3 6v18H2V22l3-6Z"/><path fill="#ebf0ec" d="M5 6h5v5H5z"/>';
+  return [8,24,40].flatMap(x=>[0,7].map(y=>'<g transform="translate('+x+' '+y+')">'+bottle+'</g>')).join('')
+    +'<path fill="'+color+'" d="M8 35h48l-3 19H11Z"/><path d="M25 43h14"/>';
+}
+function jar(fill,lid,detail){
+  return '<rect x="15" y="14" width="34" height="43" rx="7" fill="'+fill+'"/><rect x="14" y="7" width="36" height="11" rx="3" fill="'+lid+'"/><path fill="#faf0d4" d="M15 26h34v23H15z"/>'+detail;
+}
+function can(fill,detail){
+  return '<path fill="'+fill+'" d="M12 13h40v38c0 8-40 8-40 0Z"/><ellipse cx="32" cy="13" rx="20" ry="6" fill="#e2e9ea"/><path d="M13 49q19 8 38 0"/>'+detail;
+}
+const groceryAliases=new Map([
+  ['dosen tomaten','dosentomaten'],['tomaten aus der dose','dosentomaten'],
+  ['sojasoße','sojasauce'],['soja sauce','sojasauce'],['soja soße','sojasauce'],
+  ['hefe','hefewürfel'],['frische hefe','hefewürfel'],['hefe würfel','hefewürfel'],['hefewuerfel','hefewürfel'],
+  ['gemüsebrühe','brühe'],['kichererbsen aus der dose','kichererbsen'],['rote linsen','linsen'],
+  ['pesto verde','pesto'],['rinderhack','hackfleisch'],['schweineschnitzel','schnitzel']
+]);
+function groceryProductKey(title){
+  const key=groceryKey(title).replace(/[-‐‑]/g,' ').replace(/\s+/g,' ');
+  return groceryAliases.get(key)||key;
+}
+function renderProductIcon(item,tile){
+  const icon=node('span','',tile);
+  icon.className='product-icon';
+  icon.setAttribute('aria-hidden','true');
+  const key=groceryProductKey(item.title);
+  const drawing=Object.hasOwn(groceryIcons,key)?groceryIcons[key]:null;
+  if(drawing)icon.innerHTML='<svg viewBox="0 0 64 64" fill="#faf0d4" stroke="#29394b" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" focusable="false">'+drawing+'</svg>';
+  else icon.textContent=item.icon;
+}
+const shoppingEnabledKey='werhans-shopping-sync';
+const shoppingDeviceKey='werhans-shopping-device';
+let sharedShopping=[];
+let shoppingPublicKey='';
+let shoppingBusy=false;
+let shoppingReadVersion=0;
+let shoppingUpdateList=null;
+let pushRegistration=null;
+let shoppingNotice='';
+const shoppingEnabled=()=>localStorage.getItem(shoppingEnabledKey)==='1';
+const displayedShopping=()=>shoppingEnabled()?sharedShopping:(state.shopping||[]);
+function shoppingDevice(){
+  let id=localStorage.getItem(shoppingDeviceKey);
+  if(!id){id=crypto.randomUUID();localStorage.setItem(shoppingDeviceKey,id)}
+  return id;
+}
+async function shoppingRequest(action,data={}){
+  if(!syncTokens.family)throw new Error('Aktiviere zuerst den Family-Zugang unter Kalendersynchronisation.');
+  const response=await fetch('https://werhans-kalender.mathiaswerhan.workers.dev/shopping',{
+    method:action?'PUT':'GET',
+    headers:{Authorization:'Bearer '+syncTokens.family,...(action?{'Content-Type':'application/json'}:{})},
+    body:action?JSON.stringify({...data,action,device:shoppingDevice()}):undefined,
+    signal:AbortSignal.timeout(10000)
+  });
+  const result=await response.json();
+  if(!response.ok)throw new Error(result.error||'Einkaufsliste konnte nicht geladen werden.');
+  return result;
+}
+function applyShopping(items){
+  const changed=JSON.stringify(sharedShopping)!==JSON.stringify(items);
+  sharedShopping=items;
+  if(changed&&view==='home')render();
+  if(changed&&view==='shopping')shoppingUpdateList?.();
+}
+async function refreshShopping(){
+  if(!shoppingEnabled()||shoppingBusy||!['home','shopping'].includes(view))return;
+  const version=++shoppingReadVersion;
+  try{
+    const result=await shoppingRequest();
+    if(version===shoppingReadVersion&&shoppingEnabled()){
+      shoppingNotice='';
+      applyShopping(result.items);
+      if(view==='shopping')el('shoppingConnection').textContent='';
+    }
+  }catch(error){
+    if(version===shoppingReadVersion&&shoppingEnabled()){
+      shoppingNotice='Gemeinsame Liste konnte gerade nicht aktualisiert werden.';
+      if(view==='shopping')el('shoppingConnection').textContent=shoppingNotice;
+    }
+  }
+}
+async function changeShopping(action,data){
+  if(shoppingBusy)throw new Error('Die Einkaufsliste wird gerade gespeichert.');
+  shoppingBusy=true;
+  ++shoppingReadVersion;
+  try{
+    const result=await shoppingRequest(action,data);
+    applyShopping(result.items);
+  }finally{shoppingBusy=false}
+}
+function pushKeyBytes(key){
+  return Uint8Array.from(atob(key.replaceAll('-','+').replaceAll('_','/')),c=>c.charCodeAt(0));
+}
+function settingsPanel(title,area){
+  const panel=node('details','',area);
+  panel.className='settings-panel';
+  panel.setAttribute('name','werhans-settings');
+  node('summary',title,panel);
+  return node('div','',panel);
+}
+const originalBackground = 'radial-gradient(ellipse at 50% 2%,#e1eaff,transparent 36rem),#f3f6fc';
+const designThemes = new Map([
+  ['standard', {name:'Standard', gradient:originalBackground}],
+  ["vanille", {"name": "Vanille & Sand", "gradient": "linear-gradient(145deg,#fff9ed,#efdfc7)", "dark": false}],
+  ["salbei", {"name": "Salbeiblatt", "gradient": "linear-gradient(155deg,#f3f7df,#c3ddce 65%,#a9c8bd)", "dark": false}],
+  ["meer", {"name": "Meeresbrise", "gradient": "linear-gradient(145deg,#e3f9f2,#bbe6ed 55%,#a9c9ef)", "dark": false}],
+  ["himmel", {"name": "Himmelblau", "gradient": "linear-gradient(155deg,#f0f7ff,#cbdcf4 58%,#bac8ed)", "dark": false}],
+  ["lavendel", {"name": "Lavendel & Flieder", "gradient": "linear-gradient(150deg,#f5eeff,#dcd0f6 58%,#c2c8ef)", "dark": false}],
+  ["rose", {"name": "Rosenquarz", "gradient": "linear-gradient(145deg,#fff2ed,#f4cfdd 55%,#dec4e8)", "dark": false}],
+  ["pfirsich", {"name": "Pfirsich & Honig", "gradient": "linear-gradient(145deg,#fff5cf,#ffddba 58%,#f4b8aa)", "dark": false}],
+  ["waldsee", {"name": "Waldsee", "gradient": "radial-gradient(ellipse at 20% 15%,#edebc6,transparent 65%),linear-gradient(145deg,#cce7d9,#88b7b4 70%,#719caa)", "dark": false}],
+  ["nordlicht", {"name": "Nordlicht", "gradient": "radial-gradient(ellipse at 12% 12%,#2f766c,transparent 62%),radial-gradient(ellipse at 90% 82%,#5a3c79,transparent 67%),linear-gradient(150deg,#1a3146,#191d39)", "dark": true}],
+  ["abend", {"name": "Abendhimmel", "gradient": "radial-gradient(ellipse at 90% 88%,#a8606e,transparent 60%),linear-gradient(150deg,#232941,#52395c 62%,#80526b)", "dark": true}],
+]);
+const designKey = 'werhans-design-v1';
+let design = {theme:'standard', strength:85};
+let photoURL = '';
+let designDB;
+let savingPhoto = false;
+let photoStatus = '';
+try {
+  const stored = JSON.parse(localStorage.getItem(designKey));
+  if (stored && (designThemes.has(stored.theme) || stored.theme === 'photo')) design.theme = stored.theme;
+  if (stored && Number.isFinite(stored.strength)) design.strength = Math.max(0, Math.min(100, stored.strength));
+} catch {}
+
+function applyDesign(){
+  const theme = designThemes.get(design.theme);
+  const gradient = theme?.gradient ?? (photoURL ? 'url("' + photoURL + '")' : '');
+  document.body.toggleAttribute('data-custom-background', Boolean(gradient) && design.theme !== 'standard');
+  const wash = theme?.dark || design.theme === 'photo' ? 'linear-gradient(#f3f6fca6,#f3f6fca6),' : '';
+  document.body.style.setProperty('--design-background', wash + gradient);
+  document.body.style.setProperty('--design-strength', design.strength / 100);
+}
+
+function saveDesign(){
+  localStorage.setItem(designKey, JSON.stringify(design));
+  applyDesign();
+}
+
+function photoTransaction(mode, operation){
+  designDB ??= new Promise((resolve, reject)=>{
+    const request = indexedDB.open('werhans-design', 1);
+    request.onupgradeneeded = ()=>request.result.createObjectStore('background');
+    request.onsuccess = ()=>resolve(request.result);
+    request.onerror = ()=>reject(request.error);
+  });
+  return designDB.then(db=>new Promise((resolve, reject)=>{
+    const transaction = db.transaction('background', mode);
+    const request = operation(transaction.objectStore('background'));
+    transaction.oncomplete = ()=>resolve(request.result);
+    transaction.onabort = transaction.onerror = ()=>reject(transaction.error || request.error);
+  }));
+}
+
+async function prepareBackgroundPhoto(file){
+  const url = URL.createObjectURL(file);
+  try {
+    const image = new Image();
+    image.src = url;
+    await image.decode();
+    const scale = Math.min(1, 1920 / Math.max(image.naturalWidth, image.naturalHeight));
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+    canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+    const context = canvas.getContext('2d');
+    context.fillStyle = '#f3f6fc';
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.drawImage(image, 0, 0, canvas.width, canvas.height);
+    const blob = await new Promise(resolve=>canvas.toBlob(resolve, 'image/jpeg', .84));
+    if (!blob) throw new Error('Foto konnte nicht verarbeitet werden.');
+    return blob;
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
+function updateDesignControls(){
+  const section = document.querySelector('.design-settings');
+  if (!section) return;
+  for (const control of section.querySelectorAll('[data-design-theme]')){
+    control.setAttribute('aria-pressed', String(control.dataset.designTheme === design.theme));
+    control.disabled = savingPhoto;
+  }
+  section.querySelector('.design-photo-actions').hidden = !photoURL;
+  section.querySelector('input[type=file]').disabled = savingPhoto;
+  section.querySelector('.design-remove-photo').disabled = savingPhoto;
+  section.querySelector('.design-status').textContent = photoStatus;
+}
+
+function chooseDesign(theme){
+  const previous = design.theme;
+  design.theme = theme;
+  photoStatus = '';
+  try { saveDesign(); }
+  catch {
+    design.theme = previous;
+    photoStatus = 'Die Auswahl konnte auf diesem Gerät nicht gespeichert werden.';
+  }
+  updateDesignControls();
+}
+
+function renderDesignSettings(area){
+  const section = settingsPanel('Design', area);
+  section.className = 'design-settings';
+  const choices = node('div', '', section);
+  choices.className = 'design-choices';
+  choices.setAttribute('role','group');
+  choices.setAttribute('aria-label','Hintergrund wählen');
+  for (const [id, theme] of designThemes){
+    const control = button('', ()=>chooseDesign(id), choices);
+    control.type = 'button';
+    control.className = 'design-choice';
+    control.dataset.designTheme = id;
+    const swatch = node('span', '', control);
+    swatch.className = 'design-swatch';
+    swatch.style.setProperty('--swatch', theme.gradient);
+    swatch.setAttribute('aria-hidden','true');
+    node('span', theme.name, control);
+  }
+  const label = node('label', '', section);
+  node('span', 'Hintergrundstärke', label);
+  const strength = node('input', '', label);
+  strength.className = 'design-strength';
+  strength.type = 'range';
+  strength.min = '0';
+  strength.max = '100';
+  strength.value = design.strength;
+  const value = node('output', design.strength + ' %', label);
+  strength.setAttribute('aria-label','Hintergrundstärke');
+  strength.oninput = ()=>{
+    design.strength = Number(strength.value);
+    value.value = strength.value + ' %';
+    applyDesign();
+  };
+  strength.onchange = ()=>{
+    try { saveDesign(); }
+    catch {
+      photoStatus = 'Die Stärke konnte auf diesem Gerät nicht gespeichert werden.';
+      updateDesignControls();
+    }
+  };
+  const photoLabel = node('label', 'Eigenes Foto auswählen', section);
+  const upload = node('input', '', photoLabel);
+  upload.type = 'file';
+  upload.accept = 'image/*';
+  const actions = node('div', '', section);
+  actions.className = 'bar design-photo-actions';
+  const usePhoto = button('Eigenes Foto verwenden', ()=>chooseDesign('photo'), actions);
+  usePhoto.dataset.designTheme = 'photo';
+  const remove = button('Foto entfernen', async ()=>{
+    savingPhoto = true;
+    updateDesignControls();
+    try {
+      await photoTransaction('readwrite', store=>store.delete('photo'));
+      URL.revokeObjectURL(photoURL);
+      photoURL = '';
+      if (design.theme === 'photo'){
+        design.theme = 'standard';
+        applyDesign();
+        saveDesign();
+      }
+      photoStatus = 'Foto entfernt.';
+    } catch { photoStatus = 'Das Foto konnte möglicherweise nicht vollständig entfernt werden.'; }
+    finally {
+      savingPhoto = false;
+      updateDesignControls();
+    }
+  }, actions);
+  remove.className = 'design-remove-photo';
+  const status = node('p', '', section);
+  status.className = 'design-status';
+  status.setAttribute('role','status');
+  upload.onchange = async ()=>{
+    const file = upload.files[0];
+    if (!file) return;
+    savingPhoto = true;
+    photoStatus = 'Foto wird auf diesem Gerät gespeichert …';
+    updateDesignControls();
+    try {
+      const blob = await prepareBackgroundPhoto(file);
+      await photoTransaction('readwrite', store=>store.put(blob, 'photo'));
+      if (photoURL) URL.revokeObjectURL(photoURL);
+      photoURL = URL.createObjectURL(blob);
+      chooseDesign('photo');
+      if (!photoStatus) photoStatus = 'Foto auf diesem Gerät gespeichert.';
+    } catch { photoStatus = 'Dieses Foto konnte nicht gespeichert werden.'; }
+    finally {
+      upload.value = '';
+      savingPhoto = false;
+      updateDesignControls();
+    }
+  };
+  node('small', 'Eigene Fotos bleiben auf diesem Gerät.', section);
+  updateDesignControls();
+}
+
+
+function renderShoppingSettings(area){
+  const section=settingsPanel('Einkaufsliste',area);
+  const label=node('label','Gemeinsame Einkaufsliste synchronisieren',section);
+  const toggle=node('input','',label);toggle.type='checkbox';toggle.checked=shoppingEnabled();
+  const status=node('p','',section);status.setAttribute('role','status');
+  const pushButton=button('Einkaufsbenachrichtigungen aktivieren',enablePush,section);
+  const muteButton=button('Einkaufsbenachrichtigungen ausschalten',disablePush,section);
+  pushButton.disabled=true;
+  muteButton.disabled=true;
+  const pushState=node('p','',section);
+  async function preparePush(){
+    if(!('serviceWorker' in navigator)||!('PushManager' in window)){
+      pushState.textContent='Öffne den Planer über das Home-Bildschirm-Symbol, um Push einzurichten.';
+      return;
+    }
+    try{
+      pushRegistration=await navigator.serviceWorker.register('./werhans-push.js');
+      await navigator.serviceWorker.ready;
+      const subscription=await pushRegistration.pushManager.getSubscription();
+      muteButton.disabled=!subscription;
+      pushState.textContent=subscription?'Push ist auf diesem Gerät eingerichtet.':'Push ist auf diesem Gerät ausgeschaltet.';
+      if(!syncTokens.family){pushButton.disabled=true;return}
+      const result=await shoppingRequest();
+      shoppingPublicKey=result.publicKey;
+      pushButton.disabled=!shoppingPublicKey;
+      if(!shoppingPublicKey)pushState.textContent='Die Push-Schlüssel am Server fehlen noch.';
+    }catch(error){pushState.textContent=error.message;}
+  }
+  async function enablePush(){
+    pushButton.disabled=true;
+    try{
+      const subscription=await pushRegistration.pushManager.subscribe({
+        userVisibleOnly:true,applicationServerKey:pushKeyBytes(shoppingPublicKey)
+      });
+      try{await shoppingRequest('subscribe',{subscription:subscription.toJSON()});}
+      catch(error){await subscription.unsubscribe();throw error;}
+      muteButton.disabled=false;
+      pushState.textContent='Einkaufsbenachrichtigungen sind aktiviert.';
+    }catch(error){pushState.textContent=error.message;}
+    finally{pushButton.disabled=false;}
+  }
+  async function disablePush(){
+    muteButton.disabled=true;
+    try{
+      const subscription=await pushRegistration.pushManager.getSubscription();
+      if(subscription)await subscription.unsubscribe();
+      if(syncTokens.family)await shoppingRequest('unsubscribe');
+      pushState.textContent='Einkaufsbenachrichtigungen sind ausgeschaltet.';
+    }catch(error){pushState.textContent=error.message;muteButton.disabled=false;}
+  }
+  toggle.onchange=async()=>{
+    toggle.disabled=true;
+    try{
+      if(toggle.checked){
+        const result=await shoppingRequest();
+        applyShopping(result.items);
+        localStorage.setItem(shoppingEnabledKey,'1');
+        status.textContent='Gemeinsame Liste aktiviert. Die bisherige Liste bleibt auf diesem Gerät.';
+      }else{
+        ++shoppingReadVersion;
+        localStorage.removeItem(shoppingEnabledKey);
+        status.textContent='Die lokale Einkaufsliste ist aktiv.';
+      }
+    }catch(error){toggle.checked=shoppingEnabled();status.textContent=error.message;}
+    finally{toggle.disabled=false;}
+  };
+  preparePush();
+}
+window.addEventListener('focus',refreshShopping);
+setInterval(()=>{if(!document.hidden)refreshShopping()},15000);
+
+
+const shoppingRouteKey='werhans-shopping-route-v1';
+const routeCategories=[...groceryCatalog.map(([name])=>name),'Weitere Artikel'];
+const suggestedRoute=['Obst','Gemüse','Brot & Backwaren','Fleisch & Fisch','Kühlregal','Vorrat','Getränke','Haushalt & Tiere','Tiefkühl','Weitere Artikel'];
+let shoppingRoute={store:'Aldi',orders:{Aldi:[...suggestedRoute],Lidl:[...suggestedRoute]}};
+try{
+  const saved=JSON.parse(localStorage.getItem(shoppingRouteKey));
+  if(saved&&['Aldi','Lidl','Ohne Sortierung'].includes(saved.store))shoppingRoute.store=saved.store;
+  for(const store of ['Aldi','Lidl']){
+    const order=saved?.orders?.[store];
+    if(Array.isArray(order)){
+      shoppingRoute.orders[store]=[...new Set(order.filter(name=>routeCategories.includes(name)))];
+      for(const name of suggestedRoute)if(!shoppingRoute.orders[store].includes(name))shoppingRoute.orders[store].push(name);
+    }
+  }
+}catch{}
+const groceryGroups=new Map(groceryCatalog.flatMap(([category,items])=>items.map(item=>[groceryProductKey(item.title),category])));
+for(const title of ['Apfelmus','Konfitüre','Honig','Konserven'])groceryGroups.set(groceryProductKey(title),'Vorrat');
+function groceryGroup(item){
+  return groceryGroups.get(groceryProductKey(item.title))||'Weitere Artikel';
+}
+function sortShoppingRoute(items){
+  if(shoppingRoute.store==='Ohne Sortierung')return items;
+  const order=shoppingRoute.orders[shoppingRoute.store];
+  return items.slice().sort((a,b)=>order.indexOf(groceryGroup(a))-order.indexOf(groceryGroup(b)));
+}
+
+function renderShopping(area){
+  state.shopping ||= [];
+  area.className='shopping-view';
+  node('h2','Einkaufsliste',area);
+  const connection=node('p',shoppingNotice,area);connection.id='shoppingConnection';connection.setAttribute('role','status');
+  const form=node('form','',area);form.className='shop-form';
+  const searchLabel=node('label','Artikel suchen oder eingeben',form);
+  const search=node('input','',searchLabel);search.type='search';search.maxLength=100;
+  search.placeholder='z. B. Milch';
+  const qtyLabel=node('label','Menge',form);qtyLabel.className='shop-quantity';
+  const quantity=node('input','',qtyLabel);quantity.maxLength=35;quantity.placeholder='z. B. 2 l';quantity.value='1';
+  const quantityControls=node('div','',form);quantityControls.className='quantity-controls';
+  function stepQuantity(delta){
+    const match=quantity.value.trim().match(/^(\d+)(?:[.,](\d+))?\s*(.*)$/);
+    if(quantity.value.trim()&&!match){
+      quantity.focus();
+      quantity.setCustomValidity('Zum Ändern bitte eine Zahl mit Einheit eingeben, zum Beispiel 2 l.');
+      quantity.reportValidity();
+      return;
+    }
+    const value=match?Number(match[1]+'.'+(match[2]||'0')):1;
+    quantity.value=String(Math.max(1,Math.round((value+delta)*100)/100)).replace('.',',')+(match?.[3]?' '+match[3]:'');
+    quantity.setCustomValidity('');
+  }
+  quantity.oninput=()=>quantity.setCustomValidity('');
+  const minus=button('−',()=>stepQuantity(-1),quantityControls);minus.type='button';minus.setAttribute('aria-label','Menge verringern');
+  const plus=button('+',()=>stepQuantity(1),quantityControls);plus.type='button';plus.setAttribute('aria-label','Menge erhöhen');
+  const submit=node('button','Hinzufügen',form);submit.className='primary';
+  const current=node('div','',area);
+  const feedback=node('small','',area);feedback.setAttribute('role','status');
+  const undoShopping=button('Letztes Abhaken rückgängig',async()=>{
+    if(!lastChecked)return;
+    const item=lastChecked;
+    undoShopping.disabled=true;
+    try{
+      if(shoppingEnabled())await changeShopping('restore',{id:item.id});
+      else{item.done=false;save();updateList();}
+      lastChecked=null;undoShopping.hidden=true;
+      feedback.textContent=item.title+' wieder auf der Einkaufsliste.';
+    }catch(error){feedback.textContent=error.message;}
+    finally{undoShopping.disabled=false;}
+  },area);
+  undoShopping.hidden=true;
+  let lastChecked=null;
+  let adding=false;
+  const bought=node('details','',area);
+  const boughtTitle=node('summary','',bought);
+  const boughtItems=node('div','',bought);
+  let clearingPurchased=false;
+  const clearPurchased=button('Gekauftes leeren',async()=>{
+    if(clearingPurchased)return;
+    const purchased=displayedShopping().filter(item=>item.done);
+    if(!purchased.length)return;
+    if(!confirm(purchased.length+' gekaufte Artikel aus der Liste entfernen?'))return;
+    clearingPurchased=true;
+    clearPurchased.disabled=true;
+    let removed=0;
+    try{
+      if(shoppingEnabled()){
+        const latest=await shoppingRequest();
+        applyShopping(latest.items);
+        for(const item of purchased){
+          if(!displayedShopping().some(current=>current.id===item.id&&current.done))continue;
+          await changeShopping('remove',{id:item.id});
+          removed++;
+          if(lastChecked?.id===item.id){lastChecked=null;undoShopping.hidden=true;}
+        }
+      }else{
+        const previous=state.shopping;
+        state.shopping=previous.filter(item=>!item.done);
+        try{save();}catch(error){state.shopping=previous;throw error;}
+        removed=purchased.length;
+        lastChecked=null;undoShopping.hidden=true;
+        updateList();
+      }
+      feedback.textContent=removed+' gekaufte Artikel entfernt.';
+    }catch(error){
+      feedback.textContent=removed+' Artikel entfernt. '+error.message+' Bitte erneut versuchen.';
+    }finally{
+      clearingPurchased=false;
+      clearPurchased.disabled=false;
+      clearPurchased.hidden=!displayedShopping().some(item=>item.done);
+    }
+  },bought);
+  clearPurchased.type='button';
+
+  const catalogPanel=node('details','',area);
+  node('summary','Artikelkatalog',catalogPanel);
+  const tabs=node('div','',catalogPanel);tabs.className='bar shop-tabs';
+  const catalog=node('section','',catalogPanel);
+  let category='Alle';
+  const routeLabel=node('label','Einkaufsweg',area);routeLabel.className='route-label';
+  const storeSelect=node('select','',routeLabel);
+  for(const name of ['Aldi','Lidl','Ohne Sortierung']){
+    const option=node('option',name,storeSelect);option.value=name;
+  }
+  storeSelect.value=shoppingRoute.store;
+  area.insertBefore(routeLabel,current);
+  const routeSettings=node('details','',area);routeSettings.className='route-settings';
+  node('summary','Einkaufsweg anpassen',routeSettings);
+  node('p','Vorgeschlagene Reihenfolge. Passe sie an deine Filiale an.',routeSettings);
+  const routeRows=node('div','',routeSettings);
+  function saveRoute(){
+    try{localStorage.setItem(shoppingRouteKey,JSON.stringify(shoppingRoute));}
+    catch{feedback.textContent='Die Reihenfolge gilt für diese Sitzung. Sie konnte auf diesem Gerät nicht gespeichert werden.';}
+  }
+  function renderRouteSettings(focusName='',focusDirection=0){
+    routeSettings.hidden=shoppingRoute.store==='Ohne Sortierung';
+    routeRows.replaceChildren();
+    if(routeSettings.hidden)return;
+    const order=shoppingRoute.orders[shoppingRoute.store];
+    for(const [index,name] of order.entries()){
+      const row=node('div','',routeRows);row.className='route-row';
+      node('span',name,row);
+      for(const [direction,symbol,label] of [[-1,'↑','nach vorne'],[1,'↓','nach hinten']]){
+        const control=button(symbol,()=>{
+          const target=index+direction;
+          [order[index],order[target]]=[order[target],order[index]];
+          saveRoute();updateList();renderRouteSettings(name,direction);
+        },row);
+        control.type='button';
+        control.setAttribute('aria-label',name+' '+label);
+        control.disabled=index+direction<0||index+direction>=order.length;
+        if(name===focusName&&direction===focusDirection)queueMicrotask(()=>control.focus({preventScroll:true}));
+      }
+    }
+  }
+  storeSelect.onchange=()=>{
+    shoppingRoute.store=storeSelect.value;
+    saveRoute();updateList();renderRouteSettings();
+  };
+  renderRouteSettings();
+  function updateList(){
+    current.replaceChildren();
+    boughtItems.replaceChildren();
+    const pending=sortShoppingRoute(displayedShopping().filter(item=>!item.done));
+    const purchased=displayedShopping().filter(item=>item.done);
+    boughtTitle.textContent='Gekauft · '+purchased.length;
+    bought.hidden=!purchased.length;
+    clearPurchased.hidden=!purchased.length;
+    node('h3','Noch einkaufen · '+pending.length,current);
+    if(!pending.length)node('p','Deine Liste ist leer.',current).className='empty';
+    for(const [items,parent,done] of [[pending,current,false],[purchased,boughtItems,true]]){
+      if(!items.length)continue;
+      const grid=node('div','',parent);
+      grid.className='shop-grid shop-list';
+      grid.dataset.density=items.length>=16?'high':items.length>=7?'medium':'low';
+      let lastGroup='';
+      for(const item of items){
+        const group=groceryGroup(item);
+        if(!done&&shoppingRoute.store!=='Ohne Sortierung'&&group!==lastGroup){
+          node('h3',group,grid).className='shopping-group-title';
+          lastGroup=group;
+        }
+        const tileParent=done?grid:node('div','',grid);
+        if(!done)tileParent.className='shopping-item';
+        const tile=productTile(item,async()=>{
+          if(tile.disabled)return;
+          tile.disabled=true;
+          try{
+            if(shoppingEnabled())await changeShopping(done?'restore':'check',{id:item.id});
+            else {item.done=!done;save();updateList();}
+            lastChecked=done?null:item;
+            undoShopping.hidden=done;
+            feedback.textContent=item.title+(done?' wieder auf der Einkaufsliste.':' abgehakt.');
+            (parent.querySelector('button')||search).focus({preventScroll:true});
+          }catch(error){feedback.textContent=error.message;}
+          finally{tile.disabled=false;}
+        },tileParent);
+        tile.classList.add(done?'shop-bought':'shop-open');
+        tile.setAttribute('aria-label',item.title+', '+(String(item.quantity??'').trim()||'1')+(done?', wieder hinzufügen':', abhaken'));
+        if(!done){
+          const remove=button('Entfernen',async()=>{
+            if(!confirm(item.title+' von der Liste entfernen?'))return;
+            try{
+              if(shoppingEnabled())await changeShopping('remove',{id:item.id});
+              else {state.shopping=state.shopping.filter(entry=>entry!==item);save();updateList();}
+              feedback.textContent=item.title+' entfernt.';
+            }catch(error){feedback.textContent=error.message;}
+          },tileParent);
+          remove.setAttribute('aria-label',item.title+' entfernen');
+        }
+      }
+    }
+  }
+  function productTile(item,action,parent){
+    const tile=button('',action,parent);tile.type='button';tile.className='shop-tile';
+    renderProductIcon(item,tile);
+    node('strong',item.title,tile);
+    node('small',[String(item.quantity??'').trim()||'1',item.done?'✓ Gekauft':''].filter(Boolean).join(' · '),tile);
+    return tile;
+  }
+  async function addProduct(product){
+    if(adding)return;
+    adding=true;submit.disabled=true;
+    const amount=quantity.value.trim()||'1';
+    try{
+      if(shoppingEnabled())await changeShopping('add',{...product,quantity:amount});
+      else{
+        const existing=state.shopping.find(item=>groceryKey(item.title)===groceryKey(product.title));
+        if(existing){existing.done=false;if(amount)existing.quantity=amount}
+        else state.shopping.push({...product,quantity:amount,done:false});
+        save();
+      }
+    }catch(error){feedback.textContent=error.message;return;}
+    finally{adding=false;submit.disabled=false;}
+    search.value='';quantity.value='1';catalogPanel.open=false;updateList();updateCatalog();
+    feedback.textContent=product.title+' steht auf der Einkaufsliste.';
+  }
+  function updateCatalog(){
+    catalog.replaceChildren();
+    const query=groceryKey(search.value);
+    let matches=0;
+    for(const [name,items] of groceryCatalog){
+      if(!query&&category!=='Alle'&&name!==category)continue;
+      const filtered=items.filter(item=>groceryKey(item.title).includes(query)||groceryProductKey(item.title)===groceryProductKey(query));
+      if(!filtered.length)continue;
+      matches+=filtered.length;
+      node('h3',name,catalog).className='shop-category';
+      const grid=node('div','',catalog);grid.className='shop-grid';
+      for(const item of filtered)productTile(item,()=>addProduct(item),grid);
+    }
+    if(!matches)node('p','Kein Vorschlag. Mit „Hinzufügen“ kannst du deinen Artikel eintragen.',catalog).className='empty';
+  }
+  for(const name of ['Alle',...groceryCatalog.map(([name])=>name)]){
+    const tab=button(name,()=>{
+      category=name;search.value='';
+      for(const control of tabs.children)control.setAttribute('aria-pressed',String(control===tab));
+      updateCatalog();
+    },tabs);
+    tab.setAttribute('aria-pressed',String(name===category));
+  }
+  form.onsubmit=event=>{
+    event.preventDefault();
+    const title=search.value.trim().replace(/\s+/g,' ');
+    if(!title){search.focus();return}
+    const known=groceryItems.find(item=>groceryProductKey(item.title)===groceryProductKey(title));
+    addProduct(known||{title,icon:'🛒'});
+  };
+  shoppingUpdateList=updateList;
+  search.oninput=()=>{catalogPanel.open=Boolean(search.value.trim());updateCatalog()};
+  updateList();updateCatalog();
+}
+function localDay(date){
+  return [date.getFullYear(),date.getMonth()+1,date.getDate()].map(value=>String(value).padStart(2,'0')).join('-');
+}
+let selectedDay='';
+let calendarMode='Woche';
+let dayforceShifts=[];
+const dayforceStorageKey='familienplaner-dayforce-access';
+let dayforceKey='';
+try { dayforceKey=localStorage.getItem(dayforceStorageKey)||''; } catch {}
+let dayforceStatus='';
+let dayforceLoading=false;
+
+async function refreshDayforce(key){
+  if(dayforceLoading)return;
+  dayforceLoading=true;
+  dayforceStatus='Schichten werden geladen …';
+  render();
+  try {
+    const response=await fetch('https://werhans-kalender.mathiaswerhan.workers.dev/dayforce',{
+      headers:{Authorization:'Bearer '+key},
+      cache:'no-store',
+      redirect:'error',
+    });
+    if(response.status===401){
+      clearDayforceAccess();
+      throw new Error('Familien-Zugangsschlüssel wurde abgelehnt.');
+    }
+    if(!response.ok)throw new Error('Schichten konnten nicht geladen werden.');
+    const data=await response.json();
+    const day=/^\d{4}-\d{2}-\d{2}$/;
+    const clock=/^([01]\d|2[0-3]):[0-5]\d$/;
+    if(!Array.isArray(data.shifts)||!data.shifts.every(shift=>
+      shift&&day.test(shift.day)&&day.test(shift.endDay)&&clock.test(shift.clock)&&clock.test(shift.endClock)
+    ))throw new Error('Der Kalenderabruf hat unerwartete Daten geliefert.');
+    dayforceKey=key;
+    let remembered=true;
+    try { localStorage.setItem(dayforceStorageKey,key); } catch { remembered=false; }
+    dayforceShifts=data.shifts.map(shift=>({...shift,kind:'Termin',title:'Sindy · Lidl',dayforce:true}));
+    dayforceStatus=data.shifts.length+' Schichten geladen.'+(data.skipped?' Übersprungen: '+data.skipped+'.':'')+
+      (remembered?'':' Der Schlüssel konnte auf diesem Gerät nicht gespeichert werden.');
+  } catch(error) {
+    dayforceStatus=error.message||'Schichten konnten nicht geladen werden.';
+  } finally {
+    dayforceLoading=false;
+    if(view==='calendar')render();
+  }
+}
+
+function clearDayforceAccess(){
+  dayforceKey='';
+  dayforceShifts=[];
+  try { localStorage.removeItem(dayforceStorageKey); } catch {}
+}
+
+function renderDayforce(area){
+  const menu=node('details','',area);
+  menu.className='shift-menu settings-panel';
+  menu.open=false;
+  node('summary','Sindys Schichten · Einstellungen',menu);
+  const content=node('div','',menu);
+  const form=node('form','',content);
+  form.className='bar';
+  form.style.marginBlock='12px';
+  let keyInput;
+  if(!dayforceKey){
+    const label=node('label','Familien-Zugangsschlüssel ',form);
+    keyInput=node('input','',label);
+    keyInput.type='password';
+    keyInput.autocomplete='off';
+    keyInput.required=true;
+  }
+  const load=node('button',dayforceKey?'Schichten aktualisieren':'Sindys Schichten laden',form);
+  load.type='submit';
+  load.disabled=dayforceLoading;
+  form.onsubmit=event=>{
+    event.preventDefault();
+    const key=keyInput?.value.trim()||dayforceKey;
+    if(key)refreshDayforce(key);
+  };
+  if(dayforceKey){
+    const disconnect=button('Schichtzugriff auf diesem Gerät entfernen',()=>{
+      clearDayforceAccess();
+      dayforceStatus='Schichtzugriff auf diesem Gerät entfernt.';
+      render();
+    },form);
+    disconnect.type='button';
+    disconnect.disabled=dayforceLoading;
+  }
+  node('p',dayforceStatus,area).setAttribute('role','status');
+}
+
+const calendarTypes={
+  private:{label:'Privat',color:'#284bb0'},
+  family:{label:'Family',color:'var(--family-color)'},
+  couple:{label:'Matze & Sindy',color:'#27804d'}
+};
+function calendarType(item){
+  return item.dayforce?calendarTypes.family:(calendarTypes[item.calendarScope]||calendarTypes.private);
+}
+const syncScopes=['family','couple'];
+const syncKey=scope=>'werhans-events-'+scope;
+const syncTokens=Object.fromEntries(syncScopes.map(scope=>[scope,localStorage.getItem(syncKey(scope))||'']));
+const sharedItems={family:[],couple:[]};
+let syncStatus='';
+async function sharedRequest(scope,method='GET',id='',data){
+  const token=syncTokens[scope];
+  if(!token)throw new Error('Aktiviere zuerst den Zugang unter Einstellungen → Kalendersynchronisation.');
+  const response=await fetch('https://werhans-kalender.mathiaswerhan.workers.dev/events/'+scope+(id?'/'+id:''),{
+    method,headers:{Authorization:'Bearer '+token,...(data?{'Content-Type':'application/json'}:{})},
+    body:data?JSON.stringify(data):undefined,signal:AbortSignal.timeout(10000)
+  });
+  const result=await response.json();
+  if(!response.ok)throw new Error(result.error||'Kalenderanfrage fehlgeschlagen.');
+  return result;
+}
+let refreshGeneration=0;
+async function refreshShared(){
+  const generation=++refreshGeneration;
+  const results=await Promise.allSettled(syncScopes.map(async scope=>{
+    const result=syncTokens[scope]?await sharedRequest(scope):{events:[]};
+    return result.events.map(item=>({...item,calendarScope:scope}));
+  }));
+  if(generation!==refreshGeneration)return;
+  const previous=JSON.stringify([syncStatus,sharedItems]);
+  syncStatus='';
+  results.forEach((result,index)=>{
+    const scope=syncScopes[index];
+    if(result.status==='fulfilled')sharedItems[scope]=result.value;
+    else{
+      sharedItems[scope]=[];
+      syncStatus+=' '+calendarTypes[scope].label+' konnte nicht geladen werden.';
+    }
+  });
+  if(view==='calendar'&&!editor.open&&previous!==JSON.stringify([syncStatus,sharedItems]))render();
+}
+function renderSyncSettings(area){
+  const settings=settingsPanel('Kalendersynchronisation',area);
+  for(const scope of syncScopes){
+    const label=node('label',calendarTypes[scope].label,settings);
+    const input=node('input','',label);
+    input.type='password';
+    input.autocomplete='off';
+    const status=node('p',syncTokens[scope]?'Auf diesem Gerät aktiviert.':'Auf diesem Gerät deaktiviert.',settings);
+    status.setAttribute('role','status');
+    const connect=button('Zugang prüfen und speichern',async()=>{
+      const token=input.value.trim();
+      if(!token)return;
+      connect.disabled=pause.disabled=true;
+      const previous=syncTokens[scope];
+      syncTokens[scope]=token;
+      try{
+        await sharedRequest(scope);
+        localStorage.setItem(syncKey(scope),token);
+        input.value='';
+        status.textContent='Auf diesem Gerät aktiviert.';
+      }catch(error){
+        syncTokens[scope]=previous;
+        status.textContent=error.message;
+      }finally{
+        connect.disabled=pause.disabled=false;
+        refreshShared();
+      }
+    },settings);
+    const pause=button('Auf diesem Gerät deaktivieren',()=>{
+      localStorage.removeItem(syncKey(scope));
+      syncTokens[scope]='';
+      sharedItems[scope]=[];
+      status.textContent='Auf diesem Gerät deaktiviert.';
+      refreshShared();
+    },settings);
+  }
+}
+
+const dayDialog=el('dayDialog');
+el('closeDay').onclick=()=>dayDialog.close();
+el('newDayEvent').onclick=()=>openEditor(null,true);
+dayDialog.addEventListener('close',()=>{
+  screen.querySelector('.month-day[aria-pressed="true"]')?.focus({preventScroll:true});
+});
+function renderCalendar(area){
+  const today=localDay(new Date());
+  selectedDay ||= today;
+  const [year,month,day]=selectedDay.split('-').map(Number);
+  const first=new Date(year,month-1,1);
+  const monthLength=new Date(year,month,0).getDate();
+  const head=node('div','',area);head.className='calendar-header';
+  const heading=node('div','',head);
+  node('h2','Familienkalender',heading);
+  const legend=node('div','',heading);legend.className='calendar-legend';
+  for(const type of Object.values(calendarTypes)){
+    const label=node('span',type.label,legend);
+    label.className='family-key';
+    label.style.setProperty('--event-color',type.color);
+  }
+  const modes=node('div','',head);modes.className='calendar-modes';
+  for(const mode of ['Woche','Monat']){
+    const tab=button(mode,()=>{calendarMode=mode;render();screen.querySelector('.calendar-modes [aria-pressed="true"]').focus({preventScroll:true})},modes);
+    tab.setAttribute('aria-pressed',String(mode===calendarMode));
+  }
+  node('p','Wähle einen Tag, um seine Termine zu sehen.',area).className='calendar-help';
+  if(syncStatus)node('p',syncStatus,area).setAttribute('role','status');
+  const weekly=calendarMode==='Woche';
+  const monday=new Date(year,month-1,day);
+  monday.setDate(day-(monday.getDay()+6)%7);
+  const sunday=new Date(monday);
+  sunday.setDate(monday.getDate()+6);
+  const panel=node('section','',area);panel.className='month-panel';
+  const toolbar=node('div','',panel);toolbar.className='month-toolbar';
+  node('h3',weekly?dateLabel(localDay(monday))+' – '+dateLabel(localDay(sunday)):new Intl.DateTimeFormat('de-DE',{month:'long',year:'numeric'}).format(first),toolbar);
+  const controls=node('div','',toolbar);controls.className='bar';
+  function movePeriod(offset){
+    if(weekly){
+      selectedDay=localDay(new Date(year,month-1,day+offset*7));
+      render();
+      return;
+    }
+    const target=new Date(year,month-1+offset,1);
+    const last=new Date(target.getFullYear(),target.getMonth()+1,0).getDate();
+    target.setDate(Math.min(day,last));
+    selectedDay=localDay(target);
+    render();
+  }
+  button('‹ Zurück',()=>movePeriod(-1),controls).setAttribute('aria-label',weekly?'Vorherige Woche':'Vorheriger Monat');
+  button('Heute',()=>{selectedDay=today;render()},controls);
+  button('Weiter ›',()=>movePeriod(1),controls).setAttribute('aria-label',weekly?'Nächste Woche':'Nächster Monat');
+  const byDay=new Map();
+  for(const item of [...state.items,...dayforceShifts,...sharedItems.family,...sharedItems.couple]){
+    if(item.kind!=='Termin'||!item.day)continue;
+    if(!byDay.has(item.day))byDay.set(item.day,[]);
+    byDay.get(item.day).push(item);
+  }
+  const grid=node('div','',panel);grid.className=weekly?'month-grid week-grid':'month-grid';
+  for(const weekday of (weekly?[]:['Mo','Di','Mi','Do','Fr','Sa','So']))node('span',weekday,grid).className='weekday';
+  const offset=(first.getDay()+6)%7;
+  const cells=weekly?7:Math.ceil((offset+monthLength)/7)*7;
+  for(let cell=0;cell<cells;cell++){
+    const number=cell-offset+1;
+    if(!weekly&&(number<1||number>monthLength)){
+      const blank=node('span','',grid);blank.className='month-blank';blank.setAttribute('aria-hidden','true');continue;
+    }
+    const date=weekly?new Date(monday.getFullYear(),monday.getMonth(),monday.getDate()+cell):new Date(year,month-1,number);
+    const key=localDay(date);
+    const count=byDay.get(key)?.length||0;
+    const pick=button('',()=>{
+      selectedDay=key;
+      if(!weekly)dayDialog.showModal();
+      render();
+    },grid);
+    pick.setAttribute('aria-haspopup','dialog');
+    pick.className=cell%7>=5?'month-day weekend':'month-day';
+    pick.setAttribute('aria-label',dateLabel(key)+(count?' · '+count+(count===1?' Termin':' Termine'):''));
+    pick.setAttribute('aria-pressed',String(key===selectedDay));
+    if(key===today)pick.setAttribute('aria-current','date');
+    if(weekly)node('span',new Intl.DateTimeFormat('de-DE',{weekday:'short'}).format(date),pick).className='week-label';
+    node('span',String(date.getDate()),pick).className='day-number';
+    if(weekly)node('span',key===today?'Heute':count?String(count)+' T.':'–',pick).className='week-count';
+    const dots=node('span','',pick);dots.className='day-dots';dots.setAttribute('aria-hidden','true');
+    for(const item of (byDay.get(key)||[]).slice(0,4))node('i','',dots).style.setProperty('--event-color',calendarType(item).color);
+  }
+  if(weekly){
+    const agenda=node('section','',area);agenda.className='selected-agenda';
+    node('h3',(selectedDay===today?'Heute · ':'')+dateLabel(selectedDay),agenda);
+    const list=node('div','',agenda);list.className='task-group';
+    renderDayAgenda(today,byDay.get(selectedDay)||[],list);
+    button('+ Termin für diesen Tag',()=>openEditor(null,true),agenda).className='primary';
+  }
+  renderDayforce(area);
+  if(dayDialog.open)renderDayAgenda(today,byDay.get(selectedDay)||[]);
+}
+function renderDayAgenda(today,items,target=null){
+  if(!target)el('dayTitle').textContent=(selectedDay===today?'Heute · ':'')+dateLabel(selectedDay);
+  const list=target||el('dayEvents');
+  list.replaceChildren();
+  const events=items.slice().sort((a,b)=>(a.clock||'').localeCompare(b.clock||''));
+  if(!events.length)node('p','Keine Termine an diesem Tag.',list).className='empty';
+  for(const item of events){
+    const entry=item.dayforce?node('div','',list):button('',()=>openEditor(item),list);
+    entry.className='entry event-line';
+    entry.style.setProperty('--event-color',calendarType(item).color);
+    node('span',item.clock||'Ganztägig',entry).className='event-time';
+    const copy=node('span','',entry);copy.className='event-copy';
+    node('strong',item.title,copy);
+    node('small',calendarType(item).label+(syncScopes.includes(item.calendarScope)&&!item.revision?' · Nur auf diesem Gerät':''),copy).style.display='block';
+    if(item.dayforce)node('small','Bis '+(item.endDay===item.day?'':dateLabel(item.endDay)+' · ')+item.endClock+' · Dayforce',copy).style.display='block';
+    if(item.reminderMinutes)node('small','Erinnerung: '+reminderText(item.reminderMinutes),copy).style.display='block';
+    const participants=names.filter(name=>item.participants?.includes(name));
+    if(participants.length){
+      const icons=node('span','',entry);
+      icons.className='event-people';
+      icons.setAttribute('role','img');
+      icons.setAttribute('aria-label','Teilnehmende: '+participants.join(', '));
+      icons.title=participants.join(', ');
+      for(const name of participants)avatar(name,icons);
+    }
+  }
+}
+async function resize(file,size){const url=URL.createObjectURL(file);try{const img=new Image();img.src=url;await img.decode();const c=document.createElement('canvas');c.width=c.height=size;const s=Math.min(img.width,img.height);c.getContext('2d').drawImage(img,(img.width-s)/2,(img.height-s)/2,s,s,0,0,size,size);return c.toDataURL('image/jpeg',0.8)}finally{URL.revokeObjectURL(url)}}
+function normalizeClock(value){
+  const match=value.trim().match(/^(\d{1,2})(?::?(\d{2}))?$/);
+  if(!match || Number(match[1])>23 || Number(match[2]||0)>59)return '';
+  return match[1].padStart(2,'0')+':'+(match[2]||'00');
+}
+const clock=el('clock');
+clock.oninput=()=>clock.setCustomValidity('');
+clock.onblur=()=>{
+  const formatted=normalizeClock(clock.value);
+  if(formatted)clock.value=formatted;
+};
+for(const button of el('timeLabel').querySelectorAll('[data-minute]')){
+  button.onclick=()=>{
+    const current=normalizeClock(clock.value);
+    if(!current){clock.focus();return}
+    clock.value=current.slice(0,2)+':'+button.dataset.minute;
+    clock.setCustomValidity('');
+  };
+}
+let editingEvent=null;
+const participantButtons=new Map();
+for(const name of names){
+  const choice=button('',()=>{
+    choice.setAttribute('aria-pressed',String(choice.getAttribute('aria-pressed')!=='true'));
+  },el('attendeeChoices'));
+  choice.type='button';
+  choice.className='attendee-choice';
+  participantButtons.set(name,choice);
+  const option=node('option',name,el('who'));option.value=name;
+}
+const reminder=el('reminder'), reminderAmount=el('reminderAmount'), reminderUnit=el('reminderUnit');
+function reminderText(minutes){
+  if(minutes%1440===0)return (minutes/1440)+(minutes===1440?' Tag vorher':' Tage vorher');
+  if(minutes%60===0)return (minutes/60)+(minutes===60?' Stunde vorher':' Stunden vorher');
+  return minutes+(minutes===1?' Minute vorher':' Minuten vorher');
+}
+function reminderFields(){
+  const event=el('kind').value==='Termin';
+  const custom=event&&reminder.value==='custom';
+  el('reminderField').hidden=!event;
+  el('customReminder').hidden=!custom;
+  reminderAmount.disabled=!custom;
+  reminderAmount.required=custom;
+}
+reminder.onchange=reminderFields;
+function fields(){
+  el('calendarScopeLabel').hidden=el('kind').value!=='Termin';
+  reminderFields();
+  const event=el('kind').value==='Termin';
+  el('whoLabel').hidden=event;
+  el('attendeeField').hidden=!event;
+  el('allDayLabel').hidden=!event;
+  el('allDay').disabled=!event;
+  el('timeLabel').hidden=!event||el('allDay').checked;
+  clock.disabled=!event||el('allDay').checked;
+  clock.setCustomValidity('');
+  el('day').required=event;
+  el('dayCaption').textContent=event?'Datum':'Fällig am (optional)';
+}
+el('kind').onchange=()=>{fields();arrangeCalendarForm()};
+el('allDay').onchange=fields;
+
+let quickEventEntry=false;
+function arrangeCalendarForm(){
+  const form=el('form');
+  const event=el('kind').value==='Termin';
+  const title=el('titleInput').closest('label');
+  const actions=el('cancel').parentElement;
+  const scope=el('calendarScopeLabel');
+  const reminderSection=el('reminderField');
+  let extra=el('calendarExtras');
+  if(!extra){
+    form.insertBefore(scope,el('whoLabel'));
+    form.insertBefore(el('allDayLabel'),actions);
+    form.insertBefore(el('timeLabel'),actions);
+    extra=node('details','',form);extra.id='calendarExtras';
+    node('summary','Weitere Angaben',extra);
+    extra.append(el('attendeeField'),reminderSection);
+  }
+  form.insertBefore(extra,actions);
+  extra.hidden=!event;
+  extra.open=false;
+  title.firstChild.textContent=event?'Was steht an?':'Was ist zu tun?';
+  el('dayCaption').textContent=event?'Datum':'Bis wann? (optional)';
+  el('editorTitle').textContent=event?(editingEvent?'Termin bearbeiten':'Neuer Termin'):'Neue Aufgabe';
+  el('kindLabel').hidden=Boolean(editingEvent)||quickEventEntry;
+  if(event){
+    el('calendarScopeLabel').querySelector('small').textContent=
+      'Family · Familie | Matze & Sindy · gemeinsam | Privat · dieses Gerät';
+  }
+}
+
+function openEditor(item=null,quickEvent=false){
+  quickEventEntry=quickEvent;
+  editingEvent=item;
+  el('form').reset();
+  el('editorTitle').textContent=item?'Termin bearbeiten':'Neuer Eintrag';
+  el('kindLabel').hidden=Boolean(item);
+  el('kind').value=item||view==='calendar'?'Termin':'Aufgabe';
+  el('day').value=item?.day||(view==='calendar'?selectedDay:'');
+  el('titleInput').value=item?.title||'';
+  clock.value=item?.clock||'';
+  el('allDay').checked=Boolean(item&&!item.clock);
+  const minutes=item?.reminderMinutes;
+  if(minutes){
+    reminder.value=String(minutes);
+    if(!reminder.value){
+      reminder.value='custom';
+      const unit=minutes%1440===0?1440:minutes%60===0?60:1;
+      reminderUnit.value=String(unit);
+      reminderAmount.value=String(minutes/unit);
+    }
+  }
+  el('who').value=names.includes(view)?view:names[0];
+  for(const [name,choice] of participantButtons){
+    choice.replaceChildren();
+    avatar(name,choice);
+    node('span',name,choice);
+    choice.setAttribute('aria-pressed',String(item?Boolean(item.participants?.includes(name)):view===name));
+  }
+  el('calendarScope').value=item?.calendarScope||'private';
+  el('calendarScope').disabled=Boolean(item?.revision);
+  fields();
+  arrangeCalendarForm();
+  editor.showModal();
+}
+el('add').onclick=()=>openEditor();
+el('cancel').onclick=()=>editor.close();
+editor.onclose=reset;
+editor.addEventListener('cancel',event=>{
+  if(el('cancel').disabled)event.preventDefault();
+});
+window.addEventListener('focus',()=>{if(view==='calendar')refreshShared()});
+setInterval(()=>{if(view==='calendar'&&!document.hidden&&!editor.open)refreshShared()},30000);
+el('form').onsubmit=async event=>{
+  event.preventDefault();
+  const title=el('titleInput').value.trim();
+  if(!title)return;
+  const kind=el('kind').value, who=el('who').value;
+  const time=kind==='Termin'&&!el('allDay').checked?normalizeClock(clock.value):'';
+  if(kind==='Termin'&&!el('allDay').checked&&clock.value.trim()&&!time){
+    clock.setCustomValidity('Bitte eine Uhrzeit eingeben, zum Beispiel 0930 für 09:30.');
+    clock.reportValidity();
+    return;
+  }
+  const day=el('day').value;
+  if(kind==='Termin'){
+    const participants=names.filter(name=>participantButtons.get(name).getAttribute('aria-pressed')==='true');
+    const reminderMinutes=reminder.value==='custom'?Number(reminderAmount.value)*Number(reminderUnit.value):Number(reminder.value);
+    const details={title,day,clock:time,participants,reminderMinutes,calendarScope:el('calendarScope').value};
+    if(syncScopes.includes(details.calendarScope)){
+      if(editingEvent&&!editingEvent.revision&&!confirm('Diesen bisherigen Termin für '+calendarTypes[details.calendarScope].label+' freigeben?'))return;
+      const form=el('form');
+      const submit=form.querySelector('.primary');
+      if(submit.disabled)return;
+      const item=editingEvent;
+      const id=item?.revision?item.id:crypto.randomUUID();
+      submit.disabled=el('cancel').disabled=true;
+      try{
+        const result=await sharedRequest(details.calendarScope,'PUT',id,{...details,revision:item?.revision||0});
+        if(item&&!item.revision){
+          state.items=state.items.filter(entry=>entry!==item);
+          save();
+        }
+        const entries=sharedItems[details.calendarScope];
+        sharedItems[details.calendarScope]=[...entries.filter(entry=>entry.id!==id),
+          {...details,id,kind,revision:result.revision}];
+      }catch(error){
+        alert(error.message);
+        return;
+      }finally{
+        submit.disabled=el('cancel').disabled=false;
+      }
+    }else if(editingEvent)Object.assign(editingEvent,details);
+    else state.items.push({id:Date.now(),kind,...details});
+    selectedDay=day;
+  }else{
+    state.items.push({id:Date.now(),title,kind,who,status:'Offen',day,clock:''});
+  }
+  undo=null;
+  save();
+  editor.close();
+  if(kind==='Aufgabe')taskFilter='Offen';
+  go(kind==='Termin'?'calendar':who);
+  showFeedback(kind==='Termin'?'Termin gespeichert.':'Aufgabe gespeichert.');
+};
+
+function showFrame(){if(!photos.length||editor.open)return;clearTimeout(idle);clearInterval(ticker);let index=0;el('frame').hidden=false;el('slide').src=photos[index];ticker=setInterval(()=>{index=(index+1)%photos.length;el('slide').src=photos[index]},state.interval*1000)}
+function reset(){clearTimeout(idle);if(state.wait&&photos.length&&el('frame').hidden&&!editor.open)idle=setTimeout(showFrame,state.wait*1000)}
+el('frame').onclick=()=>{clearInterval(ticker);el('frame').hidden=true;go('home')};for(const event of ['pointerdown','keydown','input','scroll'])document.addEventListener(event,reset,{passive:true});
+let taskResizeTimer;
+const activePointers=new Set();
+let taskViewportWidth;
+let taskViewportHeight;
+function resizeTasks(){
+  clearTimeout(taskResizeTimer);
+  taskResizeTimer=setTimeout(()=>{
+    if(activePointers.size||!(view==='all'||names.includes(view))||editor.open||!el('frame').hidden)return;
+    const width=document.documentElement.clientWidth;
+    const height=Math.round(window.visualViewport?.height||window.innerHeight);
+    if(width===taskViewportWidth&&height===taskViewportHeight)return;
+    render();
+  },150);
+}
+window.addEventListener('pointerdown',event=>activePointers.add(event.pointerId),true);
+for(const type of ['pointerup','pointercancel']){
+  window.addEventListener(type,event=>{
+    activePointers.delete(event.pointerId);
+    resizeTasks();
+  },true);
+}
+window.addEventListener('blur',()=>{activePointers.clear();resizeTasks()});
+window.addEventListener('resize',resizeTasks);
+window.visualViewport?.addEventListener('resize',resizeTasks);
+applyDesign();
+photoTransaction('readonly', store=>store.get('photo')).then(blob=>{
+  if (blob && !photoURL) photoURL = URL.createObjectURL(blob);
+  applyDesign();
+  updateDesignControls();
+}).catch(()=>{});
+
+render();
+refreshShopping();
+</script></body></html>
+

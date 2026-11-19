@@ -339,7 +339,6 @@ body[data-custom-background]::before{
 
 .route-label{display:grid;gap:6px;margin:16px 0;font-weight:650}
 .route-label select{font:inherit;min-height:48px;width:100%;padding:8px 12px;background:white;border:1px solid var(--line);border-radius:12px;color:var(--ink)}
-.shopping-group-title{grid-column:1 / -1;margin-top:10px}
 .route-row{display:grid;grid-template-columns:minmax(0,1fr) 48px 48px;align-items:center;gap:8px;margin:8px 0}
 .route-row button{padding:6px;min-height:48px}
 .route-settings p{font-size:.85rem;margin-bottom:12px;color:var(--muted)}
@@ -356,7 +355,21 @@ body[data-custom-background]::before{
   .profile-picker .profile.my-profile strong{font-size:1.3rem}
 }
 .settings-panel select{font:inherit;width:100%;min-height:48px;padding:8px 12px;background:white;color:var(--ink);border:1px solid var(--line);border-radius:10px}
-</style></head><body><main><header><h1>The 4 Werhans</h1></header><section id="screen"></section><footer class="app-version"><small>V54 · Lokale Daten und Kalenderabgleich</small></footer><button class="new" id="add">＋ Neu</button></main>
+
+.shopping-view .shop-list{grid-template-columns:repeat(auto-fill,minmax(min(100%,130px),1fr));align-items:start;gap:10px}
+.shopping-view .shop-list .shop-tile{width:100%;min-height:128px;padding:8px;font-size:1rem}
+.shopping-view .shopping-item{align-content:start}
+@media(max-width:420px){
+  .shopping-view .shop-list{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+
+@media(max-width:699px){
+  .profile-picker .profile.my-profile{z-index:1}
+  .profile-picker .profile.my-profile .avatar{width:calc(var(--hub-size) * 1.6);height:calc(var(--hub-size) * 1.6)}
+  .profile-picker .profile.my-profile,.profile-picker .profile.my-profile:active{transform:translate(-50%,calc(var(--hub-size) * -.8))}
+  .profile-picker .profile.my-profile strong{font-size:clamp(.95rem,3.9vw,1.2rem)}
+}
+</style></head><body><main><header><h1>The 4 Werhans</h1></header><section id="screen"></section><footer class="app-version"><small>V57 · Lokale Daten und Kalenderabgleich</small></footer><button class="new" id="add">＋ Neu</button></main>
 <dialog id="dayDialog" aria-labelledby="dayTitle">
 <div class="day-dialog-header"><h2 id="dayTitle"></h2><button type="button" id="closeDay" autofocus>Schließen</button></div>
 <div id="dayEvents" class="task-group"></div>
@@ -404,6 +417,9 @@ function dateLabel(day){
   return day ? new Intl.DateTimeFormat('de-DE',{day:'numeric',month:'short',year:'numeric'}).format(new Date(day+'T12:00:00')) : '';
 }
 const deviceProfileKey='werhans-device-profile-v1';
+const deviceHandKey='werhans-device-hand-v1';
+let deviceHand='right';
+try{if(localStorage.getItem(deviceHandKey)==='left')deviceHand='left';}catch{}
 let deviceProfile='';
 try{
   const stored=localStorage.getItem(deviceProfileKey);
@@ -416,6 +432,13 @@ function renderDeviceProfileSettings(area){
   const shared=node('option','Gemeinsam genutzt',select);shared.value='';
   for(const name of names){const option=node('option',name,select);option.value=name;}
   select.value=deviceProfile;
+  const handLabel=node('label','Mit welcher Hand bedienst du dein Handy?',section);
+  const handSelect=node('select','',handLabel);
+  for(const [value,text] of [['right','Rechtshänder · Profil unten rechts'],['left','Linkshänder · Profil unten links']]){
+    const option=node('option',text,handSelect);option.value=value;
+  }
+  handSelect.value=deviceHand;
+  handSelect.disabled=!deviceProfile;
   node('small','Das ausgewählte Profil erscheint auf der Startseite größer. Die Auswahl gilt für dieses Gerät.',section);
   const status=node('p','',section);status.setAttribute('role','status');
   select.onchange=()=>{
@@ -423,12 +446,27 @@ function renderDeviceProfileSettings(area){
     try{
       localStorage.setItem(deviceProfileKey,select.value);
       deviceProfile=select.value;
+      handSelect.disabled=!deviceProfile;
       status.textContent=deviceProfile?'Profil für dieses Gerät gespeichert.':'Gemeinsame Nutzung gespeichert.';
     }catch{
       select.value=previous;
       status.textContent='Die Auswahl konnte auf diesem Gerät nicht gespeichert werden.';
     }
   };
+  handSelect.onchange=()=>{
+    try{
+      localStorage.setItem(deviceHandKey,handSelect.value);
+      deviceHand=handSelect.value;
+      status.textContent='Handbedienung für dieses Gerät gespeichert.';
+    }catch{
+      handSelect.value=deviceHand;
+      status.textContent='Die Auswahl konnte auf diesem Gerät nicht gespeichert werden.';
+    }
+  };
+}
+function preferredProfileRotation(name,hand){
+  const index=name==='Robin'?5:names.indexOf(name);
+  return ((hand==='left'?4:3)-index+6)%6;
 }
 let taskPage=0;
 let taskFilter='Offen';
@@ -479,6 +517,9 @@ function render(){
       const angle=(index*60-120)*Math.PI/180;
       return [50+33*Math.cos(angle),46+33*Math.sin(angle)];
     });
+    if(deviceProfile&&window.matchMedia('(max-width:699px)').matches){
+      profileRotation=preferredProfileRotation(deviceProfile,deviceHand);
+    }
     const circles=[];
     function positionCircle(control,index){
       const [x,y]=positions[(index+profileRotation)%positions.length];
@@ -1179,15 +1220,7 @@ function renderShopping(area){
       const grid=node('div','',parent);
       grid.className='shop-grid shop-list';
       grid.dataset.density=items.length>=16?'high':items.length>=7?'medium':'low';
-      let lastGroup='';
       for(const item of items){
-        const group=groceryGroup(item);
-        if(!done&&shoppingRoute.store!=='Ohne Sortierung'&&group!==lastGroup){
-          node('h3',group,grid).className='shopping-group-title';
-          lastGroup=group;
-        }
-        const tileParent=done?grid:node('div','',grid);
-        if(!done)tileParent.className='shopping-item';
         const tile=productTile(item,async()=>{
           if(tile.disabled)return;
           tile.disabled=true;
@@ -1200,20 +1233,10 @@ function renderShopping(area){
             (parent.querySelector('button')||search).focus({preventScroll:true});
           }catch(error){feedback.textContent=error.message;}
           finally{tile.disabled=false;}
-        },tileParent);
+        },grid);
         tile.classList.add(done?'shop-bought':'shop-open');
         tile.setAttribute('aria-label',item.title+', '+(String(item.quantity??'').trim()||'1')+(done?', wieder hinzufügen':', abhaken'));
-        if(!done){
-          const remove=button('Entfernen',async()=>{
-            if(!confirm(item.title+' von der Liste entfernen?'))return;
-            try{
-              if(shoppingEnabled())await changeShopping('remove',{id:item.id});
-              else {state.shopping=state.shopping.filter(entry=>entry!==item);save();updateList();}
-              feedback.textContent=item.title+' entfernt.';
-            }catch(error){feedback.textContent=error.message;}
-          },tileParent);
-          remove.setAttribute('aria-label',item.title+' entfernen');
-        }
+
       }
     }
   }

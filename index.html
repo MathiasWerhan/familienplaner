@@ -478,7 +478,34 @@ dialog.calendar-view-options .calendar-modes{flex-wrap:wrap;max-width:100%}
 }
 .calendar-circle::before{border-color:#8097b8}
 .calendar-view .calendar-change-view{background:#ffffffdb}
-</style></head><body><main><header><h1>The 4 Werhans</h1></header><section id="screen"></section><footer class="app-version"><small>V64 · Lokale Daten und Kalenderabgleich</small></footer><button class="new" id="add">＋ Neu</button></main>
+
+.circle-calendar .calendar-header{display:none}
+.circle-calendar .circle-panel{width:100%}
+.circle-calendar .calendar-circle{width:min(100%,560px);margin:12px auto}
+.circle-calendar .calendar-circle-day{width:clamp(52px,15vw,78px);height:clamp(52px,15vw,78px)}
+.circle-calendar .calendar-circle-day>span:first-child{font-size:.8rem}
+.circle-calendar .calendar-circle-day>strong{font-size:1.2rem}
+.circle-calendar .calendar-circle-center{font-size:1rem}
+.circle-calendar .calendar-circle-center strong{font-size:1.15rem}
+.circle-add-event{width:100%;min-height:48px;margin-top:8px}
+.circle-return{min-height:44px;align-self:flex-start}
+@media(max-width:699px){
+  .calendar-view.circle-calendar{padding:0;gap:8px}
+  .circle-calendar .circle-panel{margin:auto 0;flex:none}
+  .circle-calendar .month-toolbar{padding:0;gap:4px}
+  .circle-calendar .calendar-circle{width:min(100%,560px);margin:8px auto}
+  .circle-calendar .calendar-change-view{margin-top:0}
+  .calendar-view:not(.circle-calendar) .selected-agenda{overflow:visible;flex:none;min-height:0}
+  .calendar-view:not(.circle-calendar) .selected-agenda>.primary{position:sticky;bottom:0;flex:none}
+}
+
+.day-list-pages{justify-content:space-between;padding:0 8px;font-size:.8rem}
+.day-list-pages button{min-width:44px}
+@media(max-width:699px){
+ .calendar-view:not(.circle-calendar) .event-line{height:90px;overflow:hidden}
+ .calendar-view:not(.circle-calendar) .event-copy small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+}
+</style></head><body><main><header><h1>The 4 Werhans</h1></header><section id="screen"></section><footer class="app-version"><small>V65 · Lokale Daten und Kalenderabgleich</small></footer><button class="new" id="add">＋ Neu</button></main>
 <dialog id="dayDialog" aria-labelledby="dayTitle">
 <div class="day-dialog-header"><h2 id="dayTitle"></h2><button type="button" id="closeDay" autofocus>Schließen</button></div>
 <div id="dayEvents" class="task-group"></div>
@@ -1441,8 +1468,8 @@ function renderShopping(area){
 function localDay(date){
   return [date.getFullYear(),date.getMonth()+1,date.getDate()].map(value=>String(value).padStart(2,'0')).join('-');
 }
-let agendaPage=0;
-let agendaPageDay='';
+let dayListPage=0;
+let dayListKey='';
 let selectedDay='';
 let calendarMode='Kreis';
 let dayforceShifts=[];
@@ -1654,7 +1681,7 @@ function renderCalendar(area){
   const monthLength=new Date(year,month,0).getDate();
   const head=node('div','',area);head.className='calendar-header';
   const heading=node('div','',head);
-  node('h2','Kalender',heading);
+
   const viewOptions=node('dialog','',area);viewOptions.className='calendar-view-options';
   viewOptions.setAttribute('aria-label','Kalenderansicht auswählen');
   button('Schließen',()=>viewOptions.close(),viewOptions);
@@ -1673,6 +1700,7 @@ function renderCalendar(area){
   }
   if(syncStatus)node('p',syncStatus,area).setAttribute('role','status');
   const circular=calendarMode==='Kreis';
+  area.classList.toggle('circle-calendar',circular);
   const daily=calendarMode==='Tag';
   const weekly=calendarMode==='Woche';
   const weekPeriod=weekly||circular;
@@ -1718,7 +1746,7 @@ function renderCalendar(area){
       const key=localDay(date);
       const count=byDay.get(key)?.length||0;
       const fullDate=new Intl.DateTimeFormat('de-DE',{weekday:'long',day:'numeric',month:'long'}).format(date);
-      const pick=button('',()=>{selectedDay=key;render();screen.querySelector('[data-circle-day="'+key+'"]')?.focus({preventScroll:true})},ring);
+      const pick=button('',()=>{selectedDay=key;calendarMode='Tag';render()},ring);
       pick.className='calendar-circle-day';
       pick.setAttribute('data-circle-day',key);
       pick.setAttribute('aria-label',fullDate+' · '+count+(count===1?' Termin':' Termine'));
@@ -1762,12 +1790,21 @@ function renderCalendar(area){
     for(const item of (byDay.get(key)||[]).slice(0,4))node('i','',dots).style.setProperty('--event-color',calendarType(item).color);
   }
   }
-  if(daily||weekPeriod){
+  if(daily||weekly){
     const agenda=node('section','',area);agenda.className='selected-agenda';
     if(weekly)node('h3',calendarDayLabel(selectedDay,today),agenda);
     const list=node('div','',agenda);list.className='task-group';
     renderDayAgenda(today,byDay.get(selectedDay)||[],list);
     button(selectedDay===today?'+ Termin für heute':'+ Termin für diesen Tag',()=>openEditor(null,true),agenda).className='primary';
+  }
+  if(circular){
+    const add=button(selectedDay===today?'+ Termin für heute':'+ Termin für diesen Tag',()=>openEditor(null,true),area);
+    add.className='primary circle-add-event';
+  }
+  if(daily){
+    const back=button('‹ Zum Wochenkreis',()=>{calendarMode='Kreis';render()},area);
+    back.className='circle-return';
+    area.insertBefore(back,panel);
   }
   area.append(changeView);
   if(dayDialog.open)renderDayAgenda(today,byDay.get(selectedDay)||[]);
@@ -1780,11 +1817,20 @@ function renderDayAgenda(today,items,target=null){
   list.replaceChildren();
   const events=items.slice().sort((a,b)=>(a.clock||'').localeCompare(b.clock||''));
   if(!events.length)node('p','Keine Termine an diesem Tag.',list).className='empty';
-  if(agendaPageDay!==selectedDay){agendaPageDay=selectedDay;agendaPage=0;}
-  const paged=window.matchMedia('(max-width:699px)').matches;
-  agendaPage=Math.min(agendaPage,Math.max(0,events.length-1));
-  const shown=paged?events.slice(agendaPage,agendaPage+1):events;
-  for(const item of shown){
+  if(dayListKey!==selectedDay){dayListKey=selectedDay;dayListPage=0;}
+  const mobile=window.matchMedia('(max-width:699px)').matches;
+  const capacity=mobile?Math.max(1,Math.min(6,Math.floor(((window.visualViewport?.height||window.innerHeight)-460)/100))):Math.max(1,events.length);
+  const totalPages=Math.max(1,Math.ceil(events.length/capacity));
+  dayListPage=Math.min(dayListPage,totalPages-1);
+  if(totalPages>1){
+    const controls=node('div','',list);controls.className='bar day-list-pages';
+    const back=button('‹',()=>{dayListPage--;renderDayAgenda(today,items,target)},controls);
+    back.disabled=dayListPage===0;back.setAttribute('aria-label','Vorherige Termine');
+    node('span',(dayListPage*capacity+1)+'–'+Math.min(events.length,(dayListPage+1)*capacity)+' von '+events.length,controls);
+    const next=button('›',()=>{dayListPage++;renderDayAgenda(today,items,target)},controls);
+    next.disabled=dayListPage===totalPages-1;next.setAttribute('aria-label','Weitere Termine');
+  }
+  for(const item of events.slice(dayListPage*capacity,(dayListPage+1)*capacity)){
     const entry=item.dayforce?node('div','',list):button('',()=>openEditor(item),list);
     entry.className='entry event-line';
     entry.title=item.title;
@@ -1806,14 +1852,7 @@ function renderDayAgenda(today,items,target=null){
       for(const name of participants)avatar(name,icons);
     }
   }
-  if(paged&&events.length>1){
-    const pages=node('div','',list);pages.className='bar agenda-pages';
-    const previous=button('‹',()=>{agendaPage--;renderDayAgenda(today,items,target);requestAnimationFrame(fitCalendarView)},pages);
-    previous.setAttribute('aria-label','Vorheriger Termin');previous.disabled=agendaPage===0;
-    node('span',(agendaPage+1)+' / '+events.length+' Termine',pages).setAttribute('role','status');
-    const next=button('›',()=>{agendaPage++;renderDayAgenda(today,items,target);requestAnimationFrame(fitCalendarView)},pages);
-    next.setAttribute('aria-label','Nächster Termin');next.disabled=agendaPage===events.length-1;
-  }
+
 }
 async function resize(file,size){const url=URL.createObjectURL(file);try{const img=new Image();img.src=url;await img.decode();const c=document.createElement('canvas');c.width=c.height=size;const s=Math.min(img.width,img.height);c.getContext('2d').drawImage(img,(img.width-s)/2,(img.height-s)/2,s,s,0,0,size,size);return c.toDataURL('image/jpeg',0.8)}finally{URL.revokeObjectURL(url)}}
 function normalizeClock(value){

@@ -411,7 +411,74 @@ body[data-custom-background]::before{
 .calendar-day-count{position:absolute;top:-6px;right:-6px;display:grid;place-items:center;min-width:23px;height:23px;padding:0 4px;border-radius:999px;border:2px solid white;background:#174d55;color:white;font-size:.75rem;font-weight:750}
 .calendar-circle-day:focus-visible{outline-offset:4px}
 .calendar-view-options .calendar-modes{flex-wrap:wrap}
-</style></head><body><main><header><h1>The 4 Werhans</h1></header><section id="screen"></section><footer class="app-version"><small>V62 · Lokale Daten und Kalenderabgleich</small></footer><button class="new" id="add">＋ Neu</button></main>
+
+.calendar-view,.calendar-view>*{min-width:0;max-width:100%}
+.month-toolbar h3{overflow-wrap:anywhere}
+.agenda-pages{justify-content:space-between;padding:4px 8px}
+.agenda-pages button{min-width:44px;padding:4px 12px}
+.calendar-change-view{align-self:stretch;min-height:44px;font-size:.85rem}
+dialog.calendar-view-options{margin:auto;width:min(calc(100% - 24px),440px);max-width:calc(100% - 24px);padding:16px;border:0}
+dialog.calendar-view-options .calendar-modes{flex-wrap:wrap;max-width:100%}
+@media(max-width:699px){
+  html:has(.calendar-view),body:has(.calendar-view){height:100%;overflow:hidden}
+  main:has(.calendar-view){
+    height:100dvh;min-height:0;width:100%;max-width:100%;
+    padding:calc(8px + env(safe-area-inset-top,0px)) 12px calc(8px + env(safe-area-inset-bottom,0px));
+    display:flex;flex-direction:column;overflow:hidden;
+  }
+  main:has(.calendar-view)>header,main:has(.calendar-view) .app-version{display:none}
+  #screen:has(.calendar-view){display:flex;flex-direction:column;flex:1;min-height:0;min-width:0}
+  #screen:has(.calendar-view)>.back{margin:0;min-height:44px;flex:none;align-self:flex-start}
+  .calendar-view{display:flex;flex-direction:column;min-height:0;flex:1;padding:8px;gap:6px;overflow:hidden}
+  .calendar-header{margin:0;flex:none}
+  .calendar-header h2{font-size:1.1rem}
+  .calendar-view .month-panel{flex:none;width:100%}
+  .calendar-view .month-toolbar{display:grid;gap:4px;padding:6px 8px}
+  .calendar-view .month-toolbar h3{font-size:.82rem;line-height:1.2}
+  .calendar-view .month-toolbar .bar{width:100%;justify-content:space-between;gap:4px}
+  .calendar-view .month-toolbar button{font-size:.85rem;padding:5px 8px;min-height:44px}
+  .calendar-circle{width:min(100%,clamp(156px,calc(100dvh - 510px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px)),300px));margin:4px auto}
+  .calendar-circle-day{width:44px;height:44px}
+  .calendar-circle-center{width:46%;font-size:.78rem}
+  .calendar-circle-center strong{font-size:.88rem}
+  .calendar-circle-day>strong{font-size:.95rem}
+  .calendar-circle-day>span:first-child{font-size:.68rem}
+  .calendar-day-count{min-width:20px;height:20px;font-size:.68rem}
+  .calendar-view .selected-agenda{margin:0;gap:6px;overflow:visible;flex:none}
+  .calendar-view .selected-agenda>h3{font-size:.9rem}
+  .calendar-view .task-group{margin:0}
+  .calendar-view .event-line{padding:8px;min-height:64px;gap:6px}
+  .calendar-view .event-time{min-width:6em;font-size:.82rem}
+  .calendar-view .event-copy{font-size:.9rem}
+  .calendar-view .event-copy strong{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .calendar-view .event-copy small{font-size:.7rem}
+  .calendar-view .event-people{display:none}
+  .calendar-view .selected-agenda>.primary{min-height:44px;padding:6px 10px;font-size:.9rem}
+  .calendar-change-view{margin-top:auto;flex:none;padding:4px 8px;min-height:44px}
+  .calendar-view .agenda-pages{min-height:44px;font-size:.75rem;padding:0 6px;gap:4px}
+  .calendar-view .agenda-pages button{min-height:44px}
+  .calendar-view .empty{padding:8px;font-size:.85rem}
+  .calendar-view .month-day,.calendar-view .month-blank{min-height:28px}
+}
+
+@media(max-width:699px){
+ .compact-calendar .calendar-header{display:none}
+ .compact-calendar.circle-panel{min-width:0}
+ .compact-calendar .circle-panel .month-toolbar h3{display:none}
+ .compact-calendar .calendar-circle{margin:0 auto}
+ .calendar-view [role=status]:not(:empty){font-size:.72rem}
+}
+
+.calendar-view{background:transparent;border-radius:0}
+.calendar-view .circle-panel,.calendar-view .daily-panel{
+  background:transparent;border:0;border-radius:0;box-shadow:none;
+}
+.calendar-view .circle-panel .month-toolbar,.calendar-view .daily-panel .month-toolbar{
+  background:transparent;
+}
+.calendar-circle::before{border-color:#8097b8}
+.calendar-view .calendar-change-view{background:#ffffffdb}
+</style></head><body><main><header><h1>The 4 Werhans</h1></header><section id="screen"></section><footer class="app-version"><small>V64 · Lokale Daten und Kalenderabgleich</small></footer><button class="new" id="add">＋ Neu</button></main>
 <dialog id="dayDialog" aria-labelledby="dayTitle">
 <div class="day-dialog-header"><h2 id="dayTitle"></h2><button type="button" id="closeDay" autofocus>Schließen</button></div>
 <div id="dayEvents" class="task-group"></div>
@@ -1374,6 +1441,8 @@ function renderShopping(area){
 function localDay(date){
   return [date.getFullYear(),date.getMonth()+1,date.getDate()].map(value=>String(value).padStart(2,'0')).join('-');
 }
+let agendaPage=0;
+let agendaPageDay='';
 let selectedDay='';
 let calendarMode='Kreis';
 let dayforceShifts=[];
@@ -1555,6 +1624,24 @@ el('newDayEvent').onclick=()=>openEditor(null,true);
 dayDialog.addEventListener('close',()=>{
   screen.querySelector('.month-day[aria-pressed="true"]')?.focus({preventScroll:true});
 });
+function fitCalendarView(){
+  if(!window.matchMedia('(max-width:699px)').matches)return;
+  const area=screen.querySelector('.calendar-view');
+  const ring=area?.querySelector('.calendar-circle');
+  if(!ring)return;
+  area.classList.remove('compact-calendar');
+  ring.style.removeProperty('width');
+  let overflow=area.scrollHeight-area.clientHeight;
+  if(overflow<=1)return;
+  let size=Math.max(146,ring.getBoundingClientRect().width-overflow-2);
+  ring.style.width=size+'px';
+  overflow=area.scrollHeight-area.clientHeight;
+  if(overflow>1){
+    area.classList.add('compact-calendar');
+    overflow=area.scrollHeight-area.clientHeight;
+    if(overflow>1)ring.style.width=Math.max(146,size-overflow-2)+'px';
+  }
+}
 function calendarDayLabel(day,today){
   const label=new Intl.DateTimeFormat('de-DE',{weekday:'long',day:'numeric',month:'long'}).format(new Date(day+'T12:00:00'));
   return (day===today?'Heute · ':'')+label;
@@ -1568,8 +1655,11 @@ function renderCalendar(area){
   const head=node('div','',area);head.className='calendar-header';
   const heading=node('div','',head);
   node('h2','Kalender',heading);
-  const viewOptions=node('details','',area);viewOptions.className='calendar-view-options';
-  node('summary','Ansicht ändern',viewOptions);
+  const viewOptions=node('dialog','',area);viewOptions.className='calendar-view-options';
+  viewOptions.setAttribute('aria-label','Kalenderansicht auswählen');
+  button('Schließen',()=>viewOptions.close(),viewOptions);
+  const changeView=button('Ansicht ändern',()=>viewOptions.showModal(),area);
+  changeView.className='calendar-change-view';
   const legend=node('div','',viewOptions);legend.className='calendar-legend';
   for(const type of Object.values(calendarTypes)){
     const label=node('span',type.label,legend);
@@ -1578,7 +1668,7 @@ function renderCalendar(area){
   }
   const modes=node('div','',viewOptions);modes.className='calendar-modes';
   for(const mode of ['Kreis','Tag','Woche','Monat']){
-    const tab=button(mode,()=>{calendarMode=mode;render();screen.querySelector('.calendar-view-options summary').focus({preventScroll:true})},modes);
+    const tab=button(mode,()=>{calendarMode=mode;render();screen.querySelector('.calendar-change-view').focus({preventScroll:true})},modes);
     tab.setAttribute('aria-pressed',String(mode===calendarMode));
   }
   if(syncStatus)node('p',syncStatus,area).setAttribute('role','status');
@@ -1679,8 +1769,9 @@ function renderCalendar(area){
     renderDayAgenda(today,byDay.get(selectedDay)||[],list);
     button(selectedDay===today?'+ Termin für heute':'+ Termin für diesen Tag',()=>openEditor(null,true),agenda).className='primary';
   }
-  area.append(viewOptions);
+  area.append(changeView);
   if(dayDialog.open)renderDayAgenda(today,byDay.get(selectedDay)||[]);
+  requestAnimationFrame(fitCalendarView);
 }
 function renderDayAgenda(today,items,target=null){
   if(!target)el('newDayEvent').textContent=selectedDay===today?'+ Termin für heute':'+ Termin für diesen Tag';
@@ -1689,9 +1780,14 @@ function renderDayAgenda(today,items,target=null){
   list.replaceChildren();
   const events=items.slice().sort((a,b)=>(a.clock||'').localeCompare(b.clock||''));
   if(!events.length)node('p','Keine Termine an diesem Tag.',list).className='empty';
-  for(const item of events){
+  if(agendaPageDay!==selectedDay){agendaPageDay=selectedDay;agendaPage=0;}
+  const paged=window.matchMedia('(max-width:699px)').matches;
+  agendaPage=Math.min(agendaPage,Math.max(0,events.length-1));
+  const shown=paged?events.slice(agendaPage,agendaPage+1):events;
+  for(const item of shown){
     const entry=item.dayforce?node('div','',list):button('',()=>openEditor(item),list);
     entry.className='entry event-line';
+    entry.title=item.title;
     entry.style.setProperty('--event-color',calendarType(item).color);
     const time=item.dayforce&&item.endDay===item.day?item.clock+'–'+item.endClock:item.clock||'Ganztägig';
     node('span',time,entry).className='event-time';
@@ -1709,6 +1805,14 @@ function renderDayAgenda(today,items,target=null){
       icons.title=participants.join(', ');
       for(const name of participants)avatar(name,icons);
     }
+  }
+  if(paged&&events.length>1){
+    const pages=node('div','',list);pages.className='bar agenda-pages';
+    const previous=button('‹',()=>{agendaPage--;renderDayAgenda(today,items,target);requestAnimationFrame(fitCalendarView)},pages);
+    previous.setAttribute('aria-label','Vorheriger Termin');previous.disabled=agendaPage===0;
+    node('span',(agendaPage+1)+' / '+events.length+' Termine',pages).setAttribute('role','status');
+    const next=button('›',()=>{agendaPage++;renderDayAgenda(today,items,target);requestAnimationFrame(fitCalendarView)},pages);
+    next.setAttribute('aria-label','Nächster Termin');next.disabled=agendaPage===events.length-1;
   }
 }
 async function resize(file,size){const url=URL.createObjectURL(file);try{const img=new Image();img.src=url;await img.decode();const c=document.createElement('canvas');c.width=c.height=size;const s=Math.min(img.width,img.height);c.getContext('2d').drawImage(img,(img.width-s)/2,(img.height-s)/2,s,s,0,0,size,size);return c.toDataURL('image/jpeg',0.8)}finally{URL.revokeObjectURL(url)}}
@@ -1926,6 +2030,8 @@ for(const type of ['pointerup','pointercancel']){
 }
 window.addEventListener('blur',()=>{activePointers.clear();resizeTasks()});
 window.addEventListener('resize',resizeTasks);
+window.addEventListener('resize',()=>requestAnimationFrame(fitCalendarView));
+window.visualViewport?.addEventListener('resize',()=>requestAnimationFrame(fitCalendarView));
 window.visualViewport?.addEventListener('resize',resizeTasks);
 applyDesign();
 photoTransaction('readonly', store=>store.get('photo')).then(blob=>{

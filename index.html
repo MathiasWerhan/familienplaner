@@ -522,7 +522,7 @@ dialog.calendar-view-options .calendar-modes{flex-wrap:wrap;max-width:100%}
     white-space:normal;overflow:visible;text-overflow:clip;
   }
 }
-</style></head><body><main><header><h1>The 4 Werhans</h1></header><section id="screen"></section><footer class="app-version"><small>V66 · Lokale Daten und Kalenderabgleich</small></footer><button class="new" id="add">＋ Neu</button></main>
+</style></head><body><main><header><h1>The 4 Werhans</h1></header><section id="screen"></section><footer class="app-version"><small>V67 · Lokale Daten und Kalenderabgleich</small></footer><button class="new" id="add">＋ Neu</button></main>
 <dialog id="dayDialog" aria-labelledby="dayTitle">
 <div class="day-dialog-header"><h2 id="dayTitle"></h2><button type="button" id="closeDay" autofocus>Schließen</button></div>
 <div id="dayEvents" class="task-group"></div>
@@ -535,8 +535,8 @@ dialog.calendar-view-options .calendar-modes{flex-wrap:wrap;max-width:100%}
 </div></fieldset>
 <section id="reminderField" hidden>
 <label>Erinnerung<select id="reminder"><option value="">Keine</option><option value="5">5 Minuten vorher</option><option value="15">15 Minuten vorher</option><option value="30">30 Minuten vorher</option><option value="60">1 Stunde vorher</option><option value="120">2 Stunden vorher</option><option value="1440">1 Tag vorher</option><option value="2880">2 Tage vorher</option><option value="custom">Eigene Vorlaufzeit</option></select></label>
-<label id="calendarScopeLabel">Wer soll den Termin sehen?<select id="calendarScope"><option value="private">Nur auf diesem Gerät</option><option value="family">Ganze Familie</option><option value="couple">Matze &amp; Sindy</option></select><small>Selbst angelegte Termine liegen derzeit auf diesem Gerät.</small></label><div id="customReminder" hidden><label>Vorlauf<input id="reminderAmount" type="number" min="1" max="99999" step="1" inputmode="numeric" value="1"></label><label>Einheit<select id="reminderUnit"><option value="1">Minuten</option><option value="60">Stunden</option><option value="1440">Tage</option></select></label></div>
-<small>Die Einstellung wird gespeichert. Push ist noch nicht aktiv.</small>
+<label id="calendarScopeLabel">Wer soll den Termin sehen?<select id="calendarScope"><option value="private">Nur auf diesem Gerät</option><option value="family">Ganze Familie</option><option value="couple">Matze &amp; Sindy</option></select><small>„Nur auf diesem Gerät“ bleibt lokal. Die gemeinsamen Kalender werden synchronisiert.</small></label><div id="customReminder" hidden><label>Vorlauf<input id="reminderAmount" type="number" min="1" max="99999" step="1" inputmode="numeric" value="1"></label><label>Einheit<select id="reminderUnit"><option value="1">Minuten</option><option value="60">Stunden</option><option value="1440">Tage</option></select></label></div>
+<small>Push für gemeinsame Kalender unter Einstellungen → Kalender-Erinnerungen aktivieren. Für „Nur auf diesem Gerät“ gibt es keine Push-Erinnerung. Ganztägig: Bezugszeit 09:00 Uhr.</small>
 </section><div class="bar"><button type="button" id="cancel">Abbrechen</button><button class="primary">Speichern</button></div></form></dialog>
 <button id="frame" hidden aria-label="Zur Profilauswahl"><img id="slide" alt=""></button>
 <script>
@@ -751,7 +751,7 @@ function render(){
   button('‹ Zur Profilauswahl',()=>go('home')).className='back';
   const area=node('section');
   if(view==='settings'){area.className='settings';
-  node('h2','Einstellungen',area);renderDeviceProfileSettings(area);renderSyncSettings(area);renderDayforce(area);renderShoppingSettings(area);renderDesignSettings(area);const profiles=settingsPanel('Profilbilder',area);for(const name of names){const l=node('label',name,profiles);const f=node('input','',l);f.type='file';f.accept='image/*';f.onchange=async()=>{if(!f.files[0])return;try{state.avatars[name]=await resize(f.files[0],240);save()}catch{alert('Dieses Foto konnte nicht gespeichert werden.')}}}const slides=settingsPanel('Bilderrahmen',area);const label=node('label','Fotos für den Bilderrahmen (bis zu 100)',slides);const upload=node('input','',label);upload.type='file';upload.accept='image/*';upload.multiple=true;const count=node('small',photos.length+' Fotos · für diese Sitzung',slides);upload.onchange=()=>{if(!upload.files.length)return;photos.forEach(URL.revokeObjectURL);photos=Array.from(upload.files).slice(0,100).map(f=>URL.createObjectURL(f));count.textContent=photos.length+' Fotos · für diese Sitzung';reset()};
+  node('h2','Einstellungen',area);renderDeviceProfileSettings(area);renderSyncSettings(area);renderCalendarPushSettings(area);renderDayforce(area);renderShoppingSettings(area);renderDesignSettings(area);const profiles=settingsPanel('Profilbilder',area);for(const name of names){const l=node('label',name,profiles);const f=node('input','',l);f.type='file';f.accept='image/*';f.onchange=async()=>{if(!f.files[0])return;try{state.avatars[name]=await resize(f.files[0],240);save()}catch{alert('Dieses Foto konnte nicht gespeichert werden.')}}}const slides=settingsPanel('Bilderrahmen',area);const label=node('label','Fotos für den Bilderrahmen (bis zu 100)',slides);const upload=node('input','',label);upload.type='file';upload.accept='image/*';upload.multiple=true;const count=node('small',photos.length+' Fotos · für diese Sitzung',slides);upload.onchange=()=>{if(!upload.files.length)return;photos.forEach(URL.revokeObjectURL);photos=Array.from(upload.files).slice(0,100).map(f=>URL.createObjectURL(f));count.textContent=photos.length+' Fotos · für diese Sitzung';reset()};
 for(const [key,label] of [['wait','Start nach Sekunden (0 = aus)'],['interval','Bildwechsel nach Sekunden']]){const l=node('label',label,slides),i=node('input','',l);i.type='number';i.min=key==='wait'?0:1;i.value=state[key];i.onchange=()=>{if(i.value!==''&&i.checkValidity()){state[key]=Number(i.value);save();reset()}else i.value=state[key]}}button('Diashow testen',()=>photos.length?showFrame():alert('Wähle zuerst Fotos aus.'),slides);return}
 
   if(view==='calendar'){area.className='calendar-view';renderCalendar(area);return}
@@ -1163,7 +1163,7 @@ function renderShoppingSettings(area){
         userVisibleOnly:true,applicationServerKey:pushKeyBytes(shoppingPublicKey)
       });
       try{await shoppingRequest('subscribe',{subscription:subscription.toJSON()});}
-      catch(error){await subscription.unsubscribe();throw error;}
+      catch(error){throw error;}
       muteButton.disabled=false;
       pushState.textContent='Einkaufsbenachrichtigungen sind aktiviert.';
     }catch(error){pushState.textContent=error.message;}
@@ -1173,7 +1173,7 @@ function renderShoppingSettings(area){
     muteButton.disabled=true;
     try{
       const subscription=await pushRegistration.pushManager.getSubscription();
-      if(subscription)await subscription.unsubscribe();
+      // Das Browser-Abo wird auch von Kalender-Erinnerungen verwendet.
       if(syncTokens.family)await shoppingRequest('unsubscribe');
       pushState.textContent='Einkaufsbenachrichtigungen sind ausgeschaltet.';
     }catch(error){pushState.textContent=error.message;muteButton.disabled=false;}
@@ -1621,6 +1621,65 @@ async function refreshShared(){
   });
   if(view==='calendar'&&!editor.open&&previous!==JSON.stringify([syncStatus,sharedItems]))render();
 }
+async function calendarPushRequest(scope, data) {
+  if(!syncTokens[scope])throw new Error('Speichere zuerst den Kalenderzugang unter Kalendersynchronisation.');
+  const response=await fetch('https://werhans-kalender.mathiaswerhan.workers.dev/calendar-push/'+scope,{
+    method:data?'PUT':'GET',headers:{Authorization:'Bearer '+syncTokens[scope],...(data?{'Content-Type':'application/json'}:{})},
+    body:data?JSON.stringify({...data,device:shoppingDevice()}):undefined,signal:AbortSignal.timeout(15000)
+  });
+  let result;try{result=await response.json();}catch{throw new Error('Zuerst den neuen Kalender-Worker einrichten.');}
+  if(!response.ok)throw new Error(result.error||'Kalender-Erinnerungen nicht erreichbar.');
+  return result;
+}
+function renderCalendarPushSettings(area) {
+  const section=settingsPanel('Kalender-Erinnerungen',area);
+  node('p','Hier aktivierst du Erinnerungen für dieses Gerät.',section);
+  node('small','Ohne ausgewählte Teilnehmer werden alle angemeldeten Geräte dieses Kalenders erinnert. Sonst nur die ausgewählten Personen. Ganztägige Termine beziehen sich auf 09:00 Uhr.',section);
+  for(const scope of syncScopes) {
+    node('h3',calendarTypes[scope].label,section);
+    const label=node('label','Erinnerungen auf diesem Gerät für',section);
+    const profile=node('select','',label);
+    const key='werhans-calendar-push-'+scope;
+    for(const name of ['',...(scope==='couple'?['Matze','Sindy']:names)]) {
+      const option=node('option',name||'Person wählen',profile);option.value=name;
+    }
+    profile.value=localStorage.getItem(key)||deviceProfile;
+    const status=node('p',localStorage.getItem(key)?'Zuletzt für '+localStorage.getItem(key)+' aktiviert.':'Noch nicht aktiviert.',section);
+    status.setAttribute('role','status');
+    const enable=button('Erinnerungen aktivieren',async()=>{
+      if(!profile.value){status.textContent='Bitte zuerst eine Person wählen.';return;}
+      enable.disabled=disable.disabled=true;
+      try {
+        if(!('serviceWorker' in navigator)||!('PushManager' in window))throw new Error('Öffne den Planer über das Symbol auf dem Home-Bildschirm.');
+        // Register before subscribe; permission request stays in the user gesture.
+        const permission=await Notification.requestPermission();
+        if(permission!=='granted')throw new Error('Bitte Mitteilungen für den Planer erlauben.');
+        const registration=await navigator.serviceWorker.register('./werhans-push.js');
+        await navigator.serviceWorker.ready;
+        const config=await calendarPushRequest(scope);
+        if(!config.publicKey)throw new Error('Die Push-Schlüssel am Server fehlen.');
+        const subscription=await registration.pushManager.getSubscription()||await registration.pushManager.subscribe({
+          userVisibleOnly:true,applicationServerKey:pushKeyBytes(config.publicKey)
+        });
+        await calendarPushRequest(scope,{action:'subscribe',profile:profile.value,subscription:subscription.toJSON()});
+        localStorage.setItem(key,profile.value);
+        status.textContent='Auf diesem Gerät für '+profile.value+' aktiviert. Der Zeitplan muss auch bei Cloudflare eingerichtet sein.';
+      } catch(error){status.textContent=error.message;}
+      finally {enable.disabled=disable.disabled=false;}
+    },section);
+    const disable=button('Erinnerungen ausschalten',async()=>{
+      enable.disabled=disable.disabled=true;
+      try {
+        await calendarPushRequest(scope,{action:'unsubscribe'});
+        localStorage.removeItem(key);
+        status.textContent='Auf diesem Gerät ausgeschaltet.';
+      }catch(error){status.textContent=error.message;}
+      finally{enable.disabled=disable.disabled=false;}
+    },section);
+  }
+  node('p','Für „Nur auf diesem Gerät“ gibt es keine Push-Erinnerungen. Wähle für Erinnerungen „Ganze Familie“ oder „Matze & Sindy“.',section);
+}
+
 function renderSyncSettings(area){
   const settings=settingsPanel('Kalendersynchronisation',area);
   for(const scope of syncScopes){
@@ -2008,6 +2067,10 @@ el('form').onsubmit=async event=>{
     const participants=names.filter(name=>participantButtons.get(name).getAttribute('aria-pressed')==='true');
     const reminderMinutes=reminder.value==='custom'?Number(reminderAmount.value)*Number(reminderUnit.value):Number(reminder.value);
     const details={title,day,clock:time,participants,reminderMinutes,calendarScope:el('calendarScope').value};
+    if(details.calendarScope==='private' && reminderMinutes>0){
+      alert('Push-Erinnerungen brauchen einen gemeinsamen Kalender. Wähle „Ganze Familie“ oder „Matze & Sindy“ – oder „Keine“ bei Erinnerung.');
+      return;
+    }
     if(syncScopes.includes(details.calendarScope)){
       if(editingEvent&&!editingEvent.revision&&!confirm('Diesen bisherigen Termin für '+calendarTypes[details.calendarScope].label+' freigeben?'))return;
       const form=el('form');

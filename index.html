@@ -370,7 +370,48 @@ body[data-custom-background]::before{
   .profile-picker .profile.my-profile,.profile-picker .profile.my-profile:active{transform:translate(-50%,calc(var(--hub-size) * -.8))}
   .profile-picker .profile.my-profile strong{font-size:clamp(.95rem,3.9vw,1.2rem)}
 }
-</style></head><body><main><header><h1>The 4 Werhans</h1></header><section id="screen"></section><footer class="app-version"><small>V58 · Lokale Daten und Kalenderabgleich</small></footer><button class="new" id="add">＋ Neu</button></main>
+
+.shopping-actions{justify-content:space-between;margin:14px 0}
+.shopping-actions button{min-height:48px}
+.shopping-dialog{width:min(calc(100% - 24px),660px)}
+.shopping-dialog-header{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:16px}
+.shopping-dialog-header h2{font-size:1.4rem}
+.shopping-dialog-header button{flex:none}
+.shopping-dialog .shop-form{display:flex;flex-wrap:wrap;gap:12px;align-items:end}
+.shopping-dialog .shop-form>label:first-child{flex-basis:100%}
+.shopping-dialog .route-label{margin-top:12px}
+.shopping-view > #shoppingConnection:empty,.shopping-view > small:empty{display:none}
+@media(max-width:699px){
+  main:has(.shopping-view)>header{display:none}
+}
+
+.calendar-view-options{margin-top:20px;border-top:1px solid var(--line)}
+#screen .calendar-view-options > summary{min-height:48px;padding:12px 0;color:var(--accent)}
+.calendar-view-options .calendar-legend{margin:10px 0}
+.calendar-view-options .calendar-modes{width:fit-content;margin-bottom:12px}
+.daily-panel .month-toolbar{display:grid;gap:12px;background:#f1f5ff;padding:16px}
+.daily-panel h3{font-size:clamp(1.1rem,4.7vw,1.5rem)}
+.daily-panel .bar{justify-content:space-between;width:100%}
+.calendar-view .event-time{min-width:6.2em;font-size:1rem;font-weight:700}
+.calendar-view .event-line{align-items:flex-start;gap:10px;padding:16px}
+.calendar-view .event-copy{min-width:0}
+.calendar-view .selected-agenda{max-height:none;overflow:visible}
+.calendar-view .selected-agenda>.primary{width:100%;min-height:52px}
+
+.calendar-circle{position:relative;isolation:isolate;width:min(100%,420px);aspect-ratio:1;margin:8px auto 12px}
+.calendar-circle::before{content:"";position:absolute;inset:13%;border:1px solid #b0bedc;border-radius:50%;z-index:-1}
+.calendar-circle-center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:46%;display:grid;gap:5px;text-align:center;font-size:clamp(.9rem,3.7vw,1.15rem);pointer-events:none}
+.calendar-circle-center strong{font-size:clamp(1rem,4.1vw,1.4rem)}
+.calendar-circle-day{position:absolute;left:var(--day-x);top:var(--day-y);transform:translate(-50%,-50%);width:clamp(44px,14vw,64px);height:clamp(44px,14vw,64px);min-height:44px;border-radius:50%;padding:4px;display:grid;align-content:center;justify-items:center;gap:0;background:#eaf0ff;border:2px solid #c4d0e9;line-height:1.15}
+.calendar-circle-day>span:first-child{font-size:.75rem}
+.calendar-circle-day>strong{font-size:1.1rem}
+.calendar-circle-day[aria-current=date]{border-color:var(--accent)}
+.calendar-circle-day[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:white}
+.calendar-circle-day:active{transform:translate(-50%,-50%)}
+.calendar-day-count{position:absolute;top:-6px;right:-6px;display:grid;place-items:center;min-width:23px;height:23px;padding:0 4px;border-radius:999px;border:2px solid white;background:#174d55;color:white;font-size:.75rem;font-weight:750}
+.calendar-circle-day:focus-visible{outline-offset:4px}
+.calendar-view-options .calendar-modes{flex-wrap:wrap}
+</style></head><body><main><header><h1>The 4 Werhans</h1></header><section id="screen"></section><footer class="app-version"><small>V62 · Lokale Daten und Kalenderabgleich</small></footer><button class="new" id="add">＋ Neu</button></main>
 <dialog id="dayDialog" aria-labelledby="dayTitle">
 <div class="day-dialog-header"><h2 id="dayTitle"></h2><button type="button" id="closeDay" autofocus>Schließen</button></div>
 <div id="dayEvents" class="task-group"></div>
@@ -383,7 +424,7 @@ body[data-custom-background]::before{
 </div></fieldset>
 <section id="reminderField" hidden>
 <label>Erinnerung<select id="reminder"><option value="">Keine</option><option value="5">5 Minuten vorher</option><option value="15">15 Minuten vorher</option><option value="30">30 Minuten vorher</option><option value="60">1 Stunde vorher</option><option value="120">2 Stunden vorher</option><option value="1440">1 Tag vorher</option><option value="2880">2 Tage vorher</option><option value="custom">Eigene Vorlaufzeit</option></select></label>
-<label id="calendarScopeLabel">Kalender<select id="calendarScope"><option value="private">Privat</option><option value="family">Family</option><option value="couple">Matze &amp; Sindy</option></select><small>Selbst angelegte Termine liegen derzeit auf diesem Gerät.</small></label><div id="customReminder" hidden><label>Vorlauf<input id="reminderAmount" type="number" min="1" max="99999" step="1" inputmode="numeric" value="1"></label><label>Einheit<select id="reminderUnit"><option value="1">Minuten</option><option value="60">Stunden</option><option value="1440">Tage</option></select></label></div>
+<label id="calendarScopeLabel">Wer soll den Termin sehen?<select id="calendarScope"><option value="private">Nur auf diesem Gerät</option><option value="family">Ganze Familie</option><option value="couple">Matze &amp; Sindy</option></select><small>Selbst angelegte Termine liegen derzeit auf diesem Gerät.</small></label><div id="customReminder" hidden><label>Vorlauf<input id="reminderAmount" type="number" min="1" max="99999" step="1" inputmode="numeric" value="1"></label><label>Einheit<select id="reminderUnit"><option value="1">Minuten</option><option value="60">Stunden</option><option value="1440">Tage</option></select></label></div>
 <small>Die Einstellung wird gespeichert. Push ist noch nicht aktiv.</small>
 </section><div class="bar"><button type="button" id="cancel">Abbrechen</button><button class="primary">Speichern</button></div></form></dialog>
 <button id="frame" hidden aria-label="Zur Profilauswahl"><img id="slide" alt=""></button>
@@ -508,7 +549,7 @@ function taskRow(item,parent){
 }
 let profileRotation=0;
 function render(){
-  el('add').hidden=view==='shopping';
+  el('add').hidden=view==='shopping'||view==='calendar';
   screen.replaceChildren();
   if(view==='home'){
     const grid=node('div');
@@ -599,7 +640,7 @@ function render(){
   button('‹ Zur Profilauswahl',()=>go('home')).className='back';
   const area=node('section');
   if(view==='settings'){area.className='settings';
-  node('h2','Einstellungen',area);renderDeviceProfileSettings(area);renderSyncSettings(area);renderShoppingSettings(area);renderDesignSettings(area);const profiles=settingsPanel('Profilbilder',area);for(const name of names){const l=node('label',name,profiles);const f=node('input','',l);f.type='file';f.accept='image/*';f.onchange=async()=>{if(!f.files[0])return;try{state.avatars[name]=await resize(f.files[0],240);save()}catch{alert('Dieses Foto konnte nicht gespeichert werden.')}}}const slides=settingsPanel('Bilderrahmen',area);const label=node('label','Fotos für den Bilderrahmen (bis zu 100)',slides);const upload=node('input','',label);upload.type='file';upload.accept='image/*';upload.multiple=true;const count=node('small',photos.length+' Fotos · für diese Sitzung',slides);upload.onchange=()=>{if(!upload.files.length)return;photos.forEach(URL.revokeObjectURL);photos=Array.from(upload.files).slice(0,100).map(f=>URL.createObjectURL(f));count.textContent=photos.length+' Fotos · für diese Sitzung';reset()};
+  node('h2','Einstellungen',area);renderDeviceProfileSettings(area);renderSyncSettings(area);renderDayforce(area);renderShoppingSettings(area);renderDesignSettings(area);const profiles=settingsPanel('Profilbilder',area);for(const name of names){const l=node('label',name,profiles);const f=node('input','',l);f.type='file';f.accept='image/*';f.onchange=async()=>{if(!f.files[0])return;try{state.avatars[name]=await resize(f.files[0],240);save()}catch{alert('Dieses Foto konnte nicht gespeichert werden.')}}}const slides=settingsPanel('Bilderrahmen',area);const label=node('label','Fotos für den Bilderrahmen (bis zu 100)',slides);const upload=node('input','',label);upload.type='file';upload.accept='image/*';upload.multiple=true;const count=node('small',photos.length+' Fotos · für diese Sitzung',slides);upload.onchange=()=>{if(!upload.files.length)return;photos.forEach(URL.revokeObjectURL);photos=Array.from(upload.files).slice(0,100).map(f=>URL.createObjectURL(f));count.textContent=photos.length+' Fotos · für diese Sitzung';reset()};
 for(const [key,label] of [['wait','Start nach Sekunden (0 = aus)'],['interval','Bildwechsel nach Sekunden']]){const l=node('label',label,slides),i=node('input','',l);i.type='number';i.min=key==='wait'?0:1;i.value=state[key];i.onchange=()=>{if(i.value!==''&&i.checkValidity()){state[key]=Number(i.value);save();reset()}else i.value=state[key]}}button('Diashow testen',()=>photos.length?showFrame():alert('Wähle zuerst Fotos aus.'),slides);return}
 
   if(view==='calendar'){area.className='calendar-view';renderCalendar(area);return}
@@ -1077,9 +1118,25 @@ function sortShoppingRoute(items){
 function renderShopping(area){
   state.shopping ||= [];
   area.className='shopping-view';
-  node('h2','Einkaufsliste',area);
+  const heading=node('h2','Einkaufsliste',area);
+  const actions=node('div','',area);actions.className='bar shopping-actions';
+  function shoppingDialog(title,id){
+    const dialog=node('dialog','',area);dialog.className='shopping-dialog';
+    dialog.setAttribute('aria-labelledby',id);
+    const header=node('div','',dialog);header.className='shopping-dialog-header';
+    node('h2',title,header).id=id;
+    const close=button('Schließen',()=>dialog.close(),header);close.type='button';
+    const content=node('div','',dialog);
+    return {dialog,content};
+  }
+  const entry=shoppingDialog('Artikel hinzufügen','shoppingEntryTitle');
+  const options=shoppingDialog('Einkaufsliste verwalten','shoppingOptionsTitle');
+  const launchAdd=button('+ Artikel',()=>{entry.dialog.showModal();search.focus()},actions);launchAdd.className='primary';
+  button('Mehr',()=>options.dialog.showModal(),actions);
+  const entryFeedback=node('p','',entry.content);entryFeedback.setAttribute('role','status');
+
   const connection=node('p',shoppingNotice,area);connection.id='shoppingConnection';connection.setAttribute('role','status');
-  const form=node('form','',area);form.className='shop-form';
+  const form=node('form','',entry.content);form.className='shop-form';
   const searchLabel=node('label','Artikel suchen oder eingeben',form);
   const search=node('input','',searchLabel);search.type='search';search.maxLength=100;
   search.placeholder='z. B. Milch';
@@ -1104,6 +1161,19 @@ function renderShopping(area){
   const submit=node('button','Hinzufügen',form);submit.className='primary';
   const current=node('div','',area);
   const feedback=node('small','',area);feedback.setAttribute('role','status');
+  const optionsFeedback=node('p','',options.content);optionsFeedback.setAttribute('role','status');
+  let feedbackTimer;
+  function shoppingFeedback(message){
+    feedback.textContent=message;
+    feedback.hidden=false;
+    entryFeedback.textContent=message;
+    optionsFeedback.textContent=message;
+    clearTimeout(feedbackTimer);
+    feedbackTimer=setTimeout(()=>{feedback.textContent='';feedback.hidden=true},4000);
+  }
+  entry.dialog.addEventListener('close',()=>{entryFeedback.textContent='';});
+  options.dialog.addEventListener('close',()=>{optionsFeedback.textContent='';});
+
   const undoShopping=button('Letztes Abhaken rückgängig',async()=>{
     if(!lastChecked)return;
     const item=lastChecked;
@@ -1112,14 +1182,15 @@ function renderShopping(area){
       if(shoppingEnabled())await changeShopping('restore',{id:item.id});
       else{item.done=false;save();updateList();}
       lastChecked=null;undoShopping.hidden=true;
-      feedback.textContent=item.title+' wieder auf der Einkaufsliste.';
-    }catch(error){feedback.textContent=error.message;}
+      shoppingFeedback(item.title+' wieder auf der Einkaufsliste.');
+    }catch(error){shoppingFeedback(error.message);}
     finally{undoShopping.disabled=false;}
   },area);
   undoShopping.hidden=true;
   let lastChecked=null;
   let adding=false;
-  const bought=node('details','',area);
+  const bought=node('details','',options.content);
+  bought.open=true;
   const boughtTitle=node('summary','',bought);
   const boughtItems=node('div','',bought);
   let clearingPurchased=false;
@@ -1149,9 +1220,9 @@ function renderShopping(area){
         lastChecked=null;undoShopping.hidden=true;
         updateList();
       }
-      feedback.textContent=removed+' gekaufte Artikel entfernt.';
+      shoppingFeedback(removed+' gekaufte Artikel entfernt.');
     }catch(error){
-      feedback.textContent=removed+' Artikel entfernt. '+error.message+' Bitte erneut versuchen.';
+      shoppingFeedback(removed+' Artikel entfernt. '+error.message+' Bitte erneut versuchen.');
     }finally{
       clearingPurchased=false;
       clearPurchased.disabled=false;
@@ -1160,25 +1231,25 @@ function renderShopping(area){
   },bought);
   clearPurchased.type='button';
 
-  const catalogPanel=node('details','',area);
+  const catalogPanel=node('details','',entry.content);
   node('summary','Artikelkatalog',catalogPanel);
   const tabs=node('div','',catalogPanel);tabs.className='bar shop-tabs';
   const catalog=node('section','',catalogPanel);
   let category='Alle';
-  const routeLabel=node('label','Einkaufsweg',area);routeLabel.className='route-label';
+  const routeLabel=node('label','Einkaufsweg',options.content);routeLabel.className='route-label';
   const storeSelect=node('select','',routeLabel);
   for(const name of ['Aldi','Lidl','Ohne Sortierung']){
     const option=node('option',name,storeSelect);option.value=name;
   }
   storeSelect.value=shoppingRoute.store;
-  area.insertBefore(routeLabel,current);
-  const routeSettings=node('details','',area);routeSettings.className='route-settings';
+  options.content.insertBefore(routeLabel,bought);
+  const routeSettings=node('details','',options.content);routeSettings.className='route-settings';
   node('summary','Einkaufsweg anpassen',routeSettings);
   node('p','Vorgeschlagene Reihenfolge. Passe sie an deine Filiale an.',routeSettings);
   const routeRows=node('div','',routeSettings);
   function saveRoute(){
     try{localStorage.setItem(shoppingRouteKey,JSON.stringify(shoppingRoute));}
-    catch{feedback.textContent='Die Reihenfolge gilt für diese Sitzung. Sie konnte auf diesem Gerät nicht gespeichert werden.';}
+    catch{shoppingFeedback('Die Reihenfolge gilt für diese Sitzung. Sie konnte auf diesem Gerät nicht gespeichert werden.');}
   }
   function renderRouteSettings(focusName='',focusDirection=0){
     routeSettings.hidden=shoppingRoute.store==='Ohne Sortierung';
@@ -1214,7 +1285,7 @@ function renderShopping(area){
     boughtTitle.textContent='Gekauft · '+purchased.length;
     bought.hidden=!purchased.length;
     clearPurchased.hidden=!purchased.length;
-    node('h3','Noch einkaufen · '+pending.length,current);
+    heading.textContent='Einkaufsliste · '+pending.length;
     if(!pending.length)node('p','Deine Liste ist leer.',current).className='empty';
     for(const [items,parent,done] of [[pending,current,false],[purchased,boughtItems,true]]){
       if(!items.length)continue;
@@ -1230,9 +1301,9 @@ function renderShopping(area){
             else {item.done=!done;save();updateList();}
             lastChecked=done?null:item;
             undoShopping.hidden=done;
-            feedback.textContent=item.title+(done?' wieder auf der Einkaufsliste.':' abgehakt.');
-            (parent.querySelector('button')||search).focus({preventScroll:true});
-          }catch(error){feedback.textContent=error.message;}
+            shoppingFeedback(item.title+(done?' wieder auf der Einkaufsliste.':' abgehakt.'));
+            (parent.querySelector('button')||launchAdd).focus({preventScroll:true});
+          }catch(error){shoppingFeedback(error.message);}
           finally{tile.disabled=false;}
         },grid);
         tile.classList.add(done?'shop-bought':'shop-open');
@@ -1260,10 +1331,11 @@ function renderShopping(area){
         else state.shopping.push({...product,quantity:amount,done:false});
         save();
       }
-    }catch(error){feedback.textContent=error.message;return;}
+    }catch(error){shoppingFeedback(error.message);return;}
     finally{adding=false;submit.disabled=false;}
     search.value='';quantity.value='1';catalogPanel.open=false;updateList();updateCatalog();
-    feedback.textContent=product.title+' steht auf der Einkaufsliste.';
+    entry.dialog.close();
+    shoppingFeedback(product.title+' steht auf der Einkaufsliste.');
   }
   function updateCatalog(){
     catalog.replaceChildren();
@@ -1303,7 +1375,7 @@ function localDay(date){
   return [date.getFullYear(),date.getMonth()+1,date.getDate()].map(value=>String(value).padStart(2,'0')).join('-');
 }
 let selectedDay='';
-let calendarMode='Woche';
+let calendarMode='Kreis';
 let dayforceShifts=[];
 const dayforceStorageKey='familienplaner-dayforce-access';
 let dayforceKey='';
@@ -1313,9 +1385,11 @@ let dayforceLoading=false;
 
 async function refreshDayforce(key){
   if(dayforceLoading)return;
+  const settingsOpen=view==='settings'&&Boolean(el('shiftSettings')?.open);
   dayforceLoading=true;
   dayforceStatus='Schichten werden geladen …';
   render();
+  if(settingsOpen&&view==='settings')el('shiftSettings').open=true;
   try {
     const response=await fetch('https://werhans-kalender.mathiaswerhan.workers.dev/dayforce',{
       headers:{Authorization:'Bearer '+key},
@@ -1343,7 +1417,10 @@ async function refreshDayforce(key){
     dayforceStatus=error.message||'Schichten konnten nicht geladen werden.';
   } finally {
     dayforceLoading=false;
-    if(view==='calendar')render();
+    if(view==='calendar'||view==='settings'){
+      render();
+      if(settingsOpen&&view==='settings')el('shiftSettings').open=true;
+    }
   }
 }
 
@@ -1354,11 +1431,9 @@ function clearDayforceAccess(){
 }
 
 function renderDayforce(area){
-  const menu=node('details','',area);
-  menu.className='shift-menu settings-panel';
-  menu.open=false;
-  node('summary','Sindys Schichten · Einstellungen',menu);
-  const content=node('div','',menu);
+  const content=settingsPanel('Sindys Schichten',area);
+  const menu=content.parentElement;
+  menu.id='shiftSettings';
   const form=node('form','',content);
   form.className='bar';
   form.style.marginBlock='12px';
@@ -1383,16 +1458,17 @@ function renderDayforce(area){
       clearDayforceAccess();
       dayforceStatus='Schichtzugriff auf diesem Gerät entfernt.';
       render();
+      el('shiftSettings').open=true;
     },form);
     disconnect.type='button';
     disconnect.disabled=dayforceLoading;
   }
-  node('p',dayforceStatus,area).setAttribute('role','status');
+  node('p',dayforceStatus,content).setAttribute('role','status');
 }
 
 const calendarTypes={
   private:{label:'Privat',color:'#284bb0'},
-  family:{label:'Family',color:'var(--family-color)'},
+  family:{label:'Familie',color:'var(--family-color)'},
   couple:{label:'Matze & Sindy',color:'#27804d'}
 };
 function calendarType(item){
@@ -1474,10 +1550,15 @@ function renderSyncSettings(area){
 
 const dayDialog=el('dayDialog');
 el('closeDay').onclick=()=>dayDialog.close();
+el('newDayEvent').textContent='+ Termin eintragen';
 el('newDayEvent').onclick=()=>openEditor(null,true);
 dayDialog.addEventListener('close',()=>{
   screen.querySelector('.month-day[aria-pressed="true"]')?.focus({preventScroll:true});
 });
+function calendarDayLabel(day,today){
+  const label=new Intl.DateTimeFormat('de-DE',{weekday:'long',day:'numeric',month:'long'}).format(new Date(day+'T12:00:00'));
+  return (day===today?'Heute · ':'')+label;
+}
 function renderCalendar(area){
   const today=localDay(new Date());
   selectedDay ||= today;
@@ -1486,32 +1567,36 @@ function renderCalendar(area){
   const monthLength=new Date(year,month,0).getDate();
   const head=node('div','',area);head.className='calendar-header';
   const heading=node('div','',head);
-  node('h2','Familienkalender',heading);
-  const legend=node('div','',heading);legend.className='calendar-legend';
+  node('h2','Kalender',heading);
+  const viewOptions=node('details','',area);viewOptions.className='calendar-view-options';
+  node('summary','Ansicht ändern',viewOptions);
+  const legend=node('div','',viewOptions);legend.className='calendar-legend';
   for(const type of Object.values(calendarTypes)){
     const label=node('span',type.label,legend);
     label.className='family-key';
     label.style.setProperty('--event-color',type.color);
   }
-  const modes=node('div','',head);modes.className='calendar-modes';
-  for(const mode of ['Woche','Monat']){
-    const tab=button(mode,()=>{calendarMode=mode;render();screen.querySelector('.calendar-modes [aria-pressed="true"]').focus({preventScroll:true})},modes);
+  const modes=node('div','',viewOptions);modes.className='calendar-modes';
+  for(const mode of ['Kreis','Tag','Woche','Monat']){
+    const tab=button(mode,()=>{calendarMode=mode;render();screen.querySelector('.calendar-view-options summary').focus({preventScroll:true})},modes);
     tab.setAttribute('aria-pressed',String(mode===calendarMode));
   }
-  node('p','Wähle einen Tag, um seine Termine zu sehen.',area).className='calendar-help';
   if(syncStatus)node('p',syncStatus,area).setAttribute('role','status');
+  const circular=calendarMode==='Kreis';
+  const daily=calendarMode==='Tag';
   const weekly=calendarMode==='Woche';
+  const weekPeriod=weekly||circular;
   const monday=new Date(year,month-1,day);
   monday.setDate(day-(monday.getDay()+6)%7);
   const sunday=new Date(monday);
   sunday.setDate(monday.getDate()+6);
-  const panel=node('section','',area);panel.className='month-panel';
+  const panel=node('section','',area);panel.className=circular?'month-panel circle-panel':daily?'month-panel daily-panel':'month-panel';
   const toolbar=node('div','',panel);toolbar.className='month-toolbar';
-  node('h3',weekly?dateLabel(localDay(monday))+' – '+dateLabel(localDay(sunday)):new Intl.DateTimeFormat('de-DE',{month:'long',year:'numeric'}).format(first),toolbar);
+  node('h3',daily?calendarDayLabel(selectedDay,today):weekPeriod?dateLabel(localDay(monday))+' – '+dateLabel(localDay(sunday)):new Intl.DateTimeFormat('de-DE',{month:'long',year:'numeric'}).format(first),toolbar);
   const controls=node('div','',toolbar);controls.className='bar';
   function movePeriod(offset){
-    if(weekly){
-      selectedDay=localDay(new Date(year,month-1,day+offset*7));
+    if(daily||weekPeriod){
+      selectedDay=localDay(new Date(year,month-1,day+offset*(daily?1:7)));
       render();
       return;
     }
@@ -1521,15 +1606,43 @@ function renderCalendar(area){
     selectedDay=localDay(target);
     render();
   }
-  button('‹ Zurück',()=>movePeriod(-1),controls).setAttribute('aria-label',weekly?'Vorherige Woche':'Vorheriger Monat');
+  button('‹ Zurück',()=>movePeriod(-1),controls).setAttribute('aria-label',daily?'Vorheriger Tag':weekPeriod?'Vorherige Woche':'Vorheriger Monat');
   button('Heute',()=>{selectedDay=today;render()},controls);
-  button('Weiter ›',()=>movePeriod(1),controls).setAttribute('aria-label',weekly?'Nächste Woche':'Nächster Monat');
+  button('Weiter ›',()=>movePeriod(1),controls).setAttribute('aria-label',daily?'Nächster Tag':weekPeriod?'Nächste Woche':'Nächster Monat');
   const byDay=new Map();
   for(const item of [...state.items,...dayforceShifts,...sharedItems.family,...sharedItems.couple]){
     if(item.kind!=='Termin'||!item.day)continue;
     if(!byDay.has(item.day))byDay.set(item.day,[]);
     byDay.get(item.day).push(item);
   }
+  if(circular){
+    const ring=node('div','',panel);ring.className='calendar-circle';
+    ring.setAttribute('role','group');ring.setAttribute('aria-label','Wochentage auswählen');
+    const center=node('div','',ring);center.className='calendar-circle-center';
+    center.setAttribute('aria-live','polite');
+    const selectedDate=new Date(selectedDay+'T12:00:00');
+    node('strong',new Intl.DateTimeFormat('de-DE',{weekday:'long'}).format(selectedDate),center);
+    node('span',new Intl.DateTimeFormat('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'}).format(selectedDate),center);
+    for(let index=0;index<7;index++){
+      const date=new Date(monday.getFullYear(),monday.getMonth(),monday.getDate()+index);
+      const key=localDay(date);
+      const count=byDay.get(key)?.length||0;
+      const fullDate=new Intl.DateTimeFormat('de-DE',{weekday:'long',day:'numeric',month:'long'}).format(date);
+      const pick=button('',()=>{selectedDay=key;render();screen.querySelector('[data-circle-day="'+key+'"]')?.focus({preventScroll:true})},ring);
+      pick.className='calendar-circle-day';
+      pick.setAttribute('data-circle-day',key);
+      pick.setAttribute('aria-label',fullDate+' · '+count+(count===1?' Termin':' Termine'));
+      pick.setAttribute('aria-pressed',String(key===selectedDay));
+      if(key===today)pick.setAttribute('aria-current','date');
+      const angle=(index*360/7-90)*Math.PI/180;
+      pick.style.setProperty('--day-x',(50+37*Math.cos(angle))+'%');
+      pick.style.setProperty('--day-y',(50+37*Math.sin(angle))+'%');
+      node('span',new Intl.DateTimeFormat('de-DE',{weekday:'short'}).format(date),pick);
+      node('strong',String(date.getDate()),pick);
+      if(count){const badge=node('span',String(count),pick);badge.className='calendar-day-count';badge.setAttribute('aria-hidden','true');}
+    }
+  }
+  if(!daily&&!circular){
   const grid=node('div','',panel);grid.className=weekly?'month-grid week-grid':'month-grid';
   for(const weekday of (weekly?[]:['Mo','Di','Mi','Do','Fr','Sa','So']))node('span',weekday,grid).className='weekday';
   const offset=(first.getDay()+6)%7;
@@ -1547,28 +1660,30 @@ function renderCalendar(area){
       if(!weekly)dayDialog.showModal();
       render();
     },grid);
-    pick.setAttribute('aria-haspopup','dialog');
+    if(!weekly)pick.setAttribute('aria-haspopup','dialog');
     pick.className=cell%7>=5?'month-day weekend':'month-day';
     pick.setAttribute('aria-label',dateLabel(key)+(count?' · '+count+(count===1?' Termin':' Termine'):''));
     pick.setAttribute('aria-pressed',String(key===selectedDay));
     if(key===today)pick.setAttribute('aria-current','date');
     if(weekly)node('span',new Intl.DateTimeFormat('de-DE',{weekday:'short'}).format(date),pick).className='week-label';
     node('span',String(date.getDate()),pick).className='day-number';
-    if(weekly)node('span',key===today?'Heute':count?String(count)+' T.':'–',pick).className='week-count';
+    if(weekly)node('span',String(count),pick).className='week-count';
     const dots=node('span','',pick);dots.className='day-dots';dots.setAttribute('aria-hidden','true');
     for(const item of (byDay.get(key)||[]).slice(0,4))node('i','',dots).style.setProperty('--event-color',calendarType(item).color);
   }
-  if(weekly){
+  }
+  if(daily||weekPeriod){
     const agenda=node('section','',area);agenda.className='selected-agenda';
-    node('h3',(selectedDay===today?'Heute · ':'')+dateLabel(selectedDay),agenda);
+    if(weekly)node('h3',calendarDayLabel(selectedDay,today),agenda);
     const list=node('div','',agenda);list.className='task-group';
     renderDayAgenda(today,byDay.get(selectedDay)||[],list);
-    button('+ Termin für diesen Tag',()=>openEditor(null,true),agenda).className='primary';
+    button(selectedDay===today?'+ Termin für heute':'+ Termin für diesen Tag',()=>openEditor(null,true),agenda).className='primary';
   }
-  renderDayforce(area);
+  area.append(viewOptions);
   if(dayDialog.open)renderDayAgenda(today,byDay.get(selectedDay)||[]);
 }
 function renderDayAgenda(today,items,target=null){
+  if(!target)el('newDayEvent').textContent=selectedDay===today?'+ Termin für heute':'+ Termin für diesen Tag';
   if(!target)el('dayTitle').textContent=(selectedDay===today?'Heute · ':'')+dateLabel(selectedDay);
   const list=target||el('dayEvents');
   list.replaceChildren();
@@ -1578,11 +1693,12 @@ function renderDayAgenda(today,items,target=null){
     const entry=item.dayforce?node('div','',list):button('',()=>openEditor(item),list);
     entry.className='entry event-line';
     entry.style.setProperty('--event-color',calendarType(item).color);
-    node('span',item.clock||'Ganztägig',entry).className='event-time';
+    const time=item.dayforce&&item.endDay===item.day?item.clock+'–'+item.endClock:item.clock||'Ganztägig';
+    node('span',time,entry).className='event-time';
     const copy=node('span','',entry);copy.className='event-copy';
     node('strong',item.title,copy);
     node('small',calendarType(item).label+(syncScopes.includes(item.calendarScope)&&!item.revision?' · Nur auf diesem Gerät':''),copy).style.display='block';
-    if(item.dayforce)node('small','Bis '+(item.endDay===item.day?'':dateLabel(item.endDay)+' · ')+item.endClock+' · Dayforce',copy).style.display='block';
+    if(item.dayforce&&item.endDay!==item.day)node('small','Bis '+(item.endDay===item.day?'':dateLabel(item.endDay)+' · ')+item.endClock,copy).style.display='block';
     if(item.reminderMinutes)node('small','Erinnerung: '+reminderText(item.reminderMinutes),copy).style.display='block';
     const participants=names.filter(name=>item.participants?.includes(name));
     if(participants.length){
@@ -1676,6 +1792,7 @@ function arrangeCalendarForm(){
     extra.append(el('attendeeField'),reminderSection);
   }
   form.insertBefore(extra,actions);
+  form.insertBefore(scope,extra);
   extra.hidden=!event;
   extra.open=false;
   title.firstChild.textContent=event?'Was steht an?':'Was ist zu tun?';
@@ -1684,7 +1801,7 @@ function arrangeCalendarForm(){
   el('kindLabel').hidden=Boolean(editingEvent)||quickEventEntry;
   if(event){
     el('calendarScopeLabel').querySelector('small').textContent=
-      'Family · Familie | Matze & Sindy · gemeinsam | Privat · dieses Gerät';
+      '';
   }
 }
 

@@ -522,7 +522,7 @@ dialog.calendar-view-options .calendar-modes{flex-wrap:wrap;max-width:100%}
     white-space:normal;overflow:visible;text-overflow:clip;
   }
 }
-</style></head><body><main><header><h1>The 4 Werhans</h1></header><section id="screen"></section><footer class="app-version"><small>V67 · Lokale Daten und Kalenderabgleich</small></footer><button class="new" id="add">＋ Neu</button></main>
+</style></head><body><main><header><h1>The 4 Werhans</h1></header><section id="screen"></section><footer class="app-version"><small>V68 · Lokale Daten und Kalenderabgleich</small></footer><button class="new" id="add">＋ Neu</button></main>
 <dialog id="dayDialog" aria-labelledby="dayTitle">
 <div class="day-dialog-header"><h2 id="dayTitle"></h2><button type="button" id="closeDay" autofocus>Schließen</button></div>
 <div id="dayEvents" class="task-group"></div>
@@ -1633,21 +1633,22 @@ async function calendarPushRequest(scope, data) {
 }
 function renderCalendarPushSettings(area) {
   const section=settingsPanel('Kalender-Erinnerungen',area);
-  node('p','Hier aktivierst du Erinnerungen für dieses Gerät.',section);
-  node('small','Ohne ausgewählte Teilnehmer werden alle angemeldeten Geräte dieses Kalenders erinnert. Sonst nur die ausgewählten Personen. Ganztägige Termine beziehen sich auf 09:00 Uhr.',section);
+  node('p','Wessen Erinnerungen soll dieses Gerät erhalten?',section);
+  node('small','Gemeinsames iPad: „Alle Familienmitglieder“ wählen. Eigenes Handy: den eigenen Namen wählen. Danach „Erinnerungen aktivieren“ antippen.',section);
   for(const scope of syncScopes) {
     node('h3',calendarTypes[scope].label,section);
     const label=node('label','Erinnerungen auf diesem Gerät für',section);
     const profile=node('select','',label);
     const key='werhans-calendar-push-'+scope;
-    for(const name of ['',...(scope==='couple'?['Matze','Sindy']:names)]) {
-      const option=node('option',name||'Person wählen',profile);option.value=name;
+    for(const name of ['','all',...(scope==='couple'?['Matze','Sindy']:names)]) {
+      const option=node('option',name==='all'?(scope==='family'?'Alle Familienmitglieder':'Matze und Sindy gemeinsam'):(name||'Bitte wählen'),profile);option.value=name;
     }
     profile.value=localStorage.getItem(key)||deviceProfile;
-    const status=node('p',localStorage.getItem(key)?'Zuletzt für '+localStorage.getItem(key)+' aktiviert.':'Noch nicht aktiviert.',section);
+    const recipientLabel=value=>value==='all'?(scope==='family'?'alle Familienmitglieder':'Matze und Sindy'):value;
+    const status=node('p',localStorage.getItem(key)?'Zuletzt für '+recipientLabel(localStorage.getItem(key))+' aktiviert.':'Noch nicht aktiviert.',section);
     status.setAttribute('role','status');
     const enable=button('Erinnerungen aktivieren',async()=>{
-      if(!profile.value){status.textContent='Bitte zuerst eine Person wählen.';return;}
+      if(!profile.value){status.textContent='Bitte zuerst auswählen, für wen dieses Gerät Erinnerungen erhalten soll.';return;}
       enable.disabled=disable.disabled=true;
       try {
         if(!('serviceWorker' in navigator)||!('PushManager' in window))throw new Error('Öffne den Planer über das Symbol auf dem Home-Bildschirm.');
@@ -1658,12 +1659,13 @@ function renderCalendarPushSettings(area) {
         await navigator.serviceWorker.ready;
         const config=await calendarPushRequest(scope);
         if(!config.publicKey)throw new Error('Die Push-Schlüssel am Server fehlen.');
+        if(config.version<68 && profile.value==='all')throw new Error('Bitte zuerst den Worker V68 bei Cloudflare einsetzen.');
         const subscription=await registration.pushManager.getSubscription()||await registration.pushManager.subscribe({
           userVisibleOnly:true,applicationServerKey:pushKeyBytes(config.publicKey)
         });
         await calendarPushRequest(scope,{action:'subscribe',profile:profile.value,subscription:subscription.toJSON()});
         localStorage.setItem(key,profile.value);
-        status.textContent='Auf diesem Gerät für '+profile.value+' aktiviert. Der Zeitplan muss auch bei Cloudflare eingerichtet sein.';
+        status.textContent='Erinnerungen für '+recipientLabel(profile.value)+' sind auf diesem Gerät aktiviert.';
       } catch(error){status.textContent=error.message;}
       finally {enable.disabled=disable.disabled=false;}
     },section);
@@ -1677,7 +1679,7 @@ function renderCalendarPushSettings(area) {
       finally{enable.disabled=disable.disabled=false;}
     },section);
   }
-  node('p','Für „Nur auf diesem Gerät“ gibt es keine Push-Erinnerungen. Wähle für Erinnerungen „Ganze Familie“ oder „Matze & Sindy“.',section);
+  node('small','Familie und „Matze & Sindy“ werden getrennt aktiviert. Die gemeinsame Auswahl gilt nur für den jeweiligen Kalender. Ganztägige Termine: Bezugszeit 09:00 Uhr. Rein lokale Termine unterstützen keine Push-Erinnerung.',section);
 }
 
 function renderSyncSettings(area){

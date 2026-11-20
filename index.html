@@ -499,13 +499,30 @@ dialog.calendar-view-options .calendar-modes{flex-wrap:wrap;max-width:100%}
   .calendar-view:not(.circle-calendar) .selected-agenda>.primary{position:sticky;bottom:0;flex:none}
 }
 
-.day-list-pages{justify-content:space-between;padding:0 8px;font-size:.8rem}
-.day-list-pages button{min-width:44px}
 @media(max-width:699px){
  .calendar-view:not(.circle-calendar) .event-line{height:90px;overflow:hidden}
  .calendar-view:not(.circle-calendar) .event-copy small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 }
-</style></head><body><main><header><h1>The 4 Werhans</h1></header><section id="screen"></section><footer class="app-version"><small>V65 · Lokale Daten und Kalenderabgleich</small></footer><button class="new" id="add">＋ Neu</button></main>
+
+@media(max-width:699px){
+  .calendar-view:not(.circle-calendar) .selected-agenda{
+    display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden;max-height:none;
+  }
+  .calendar-view:not(.circle-calendar) .selected-agenda>h3{flex:none}
+  .calendar-view:not(.circle-calendar) .selected-agenda>.task-group{
+    flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;
+    overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y;
+  }
+  .calendar-view:not(.circle-calendar) .selected-agenda>.primary{
+    position:static;flex:none;margin-top:6px;
+  }
+  .calendar-view:not(.circle-calendar) .event-line{height:auto;min-height:76px;overflow:visible}
+  .calendar-view:not(.circle-calendar) .event-copy strong{display:block;-webkit-line-clamp:unset}
+  .calendar-view:not(.circle-calendar) .event-copy small{
+    white-space:normal;overflow:visible;text-overflow:clip;
+  }
+}
+</style></head><body><main><header><h1>The 4 Werhans</h1></header><section id="screen"></section><footer class="app-version"><small>V66 · Lokale Daten und Kalenderabgleich</small></footer><button class="new" id="add">＋ Neu</button></main>
 <dialog id="dayDialog" aria-labelledby="dayTitle">
 <div class="day-dialog-header"><h2 id="dayTitle"></h2><button type="button" id="closeDay" autofocus>Schließen</button></div>
 <div id="dayEvents" class="task-group"></div>
@@ -1468,8 +1485,6 @@ function renderShopping(area){
 function localDay(date){
   return [date.getFullYear(),date.getMonth()+1,date.getDate()].map(value=>String(value).padStart(2,'0')).join('-');
 }
-let dayListPage=0;
-let dayListKey='';
 let selectedDay='';
 let calendarMode='Kreis';
 let dayforceShifts=[];
@@ -1817,20 +1832,7 @@ function renderDayAgenda(today,items,target=null){
   list.replaceChildren();
   const events=items.slice().sort((a,b)=>(a.clock||'').localeCompare(b.clock||''));
   if(!events.length)node('p','Keine Termine an diesem Tag.',list).className='empty';
-  if(dayListKey!==selectedDay){dayListKey=selectedDay;dayListPage=0;}
-  const mobile=window.matchMedia('(max-width:699px)').matches;
-  const capacity=mobile?Math.max(1,Math.min(6,Math.floor(((window.visualViewport?.height||window.innerHeight)-460)/100))):Math.max(1,events.length);
-  const totalPages=Math.max(1,Math.ceil(events.length/capacity));
-  dayListPage=Math.min(dayListPage,totalPages-1);
-  if(totalPages>1){
-    const controls=node('div','',list);controls.className='bar day-list-pages';
-    const back=button('‹',()=>{dayListPage--;renderDayAgenda(today,items,target)},controls);
-    back.disabled=dayListPage===0;back.setAttribute('aria-label','Vorherige Termine');
-    node('span',(dayListPage*capacity+1)+'–'+Math.min(events.length,(dayListPage+1)*capacity)+' von '+events.length,controls);
-    const next=button('›',()=>{dayListPage++;renderDayAgenda(today,items,target)},controls);
-    next.disabled=dayListPage===totalPages-1;next.setAttribute('aria-label','Weitere Termine');
-  }
-  for(const item of events.slice(dayListPage*capacity,(dayListPage+1)*capacity)){
+  for(const item of events){
     const entry=item.dayforce?node('div','',list):button('',()=>openEditor(item),list);
     entry.className='entry event-line';
     entry.title=item.title;

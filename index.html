@@ -545,7 +545,7 @@ main:has(.shopping-view)>#screen{display:flex;flex-direction:column;flex:1;min-h
 .shopping-view>.shopping-tiles>.shop-list{align-content:start}
 main:has(.shopping-view)>.app-version{flex:none;margin-top:8px;font-size:.7rem}
 .shopping-view>#shoppingConnection:not(:empty){font-size:.78rem;margin-bottom:4px}
-</style></head><body><main><header><h1>The 4 Werhans</h1></header><section id="screen"></section><footer class="app-version"><small>V72 · Lokale Daten und Kalenderabgleich</small></footer><button class="new" id="add">＋ Neu</button></main>
+</style></head><body><main><header><h1>The 4 Werhans</h1></header><section id="screen"></section><footer class="app-version"><small>V73 · Lokale Daten und Kalenderabgleich</small></footer><button class="new" id="add">＋ Neu</button></main>
 <dialog id="dayDialog" aria-labelledby="dayTitle">
 <div class="day-dialog-header"><h2 id="dayTitle"></h2><button type="button" id="closeDay" autofocus>Schließen</button></div>
 <div id="dayEvents" class="task-group"></div>
@@ -1872,13 +1872,13 @@ function renderCalendar(area){
       const pick=button('',()=>{selectedDay=key;calendarMode='Tag';render()},ring);
       pick.className='calendar-circle-day';
       pick.setAttribute('data-circle-day',key);
-      pick.setAttribute('aria-label',fullDate+' · '+count+(count===1?' Termin':' Termine'));
+      pick.setAttribute('aria-label',(key===today?'Heute · ':'')+fullDate+' · '+count+(count===1?' Termin':' Termine'));
       pick.setAttribute('aria-pressed',String(key===selectedDay));
       if(key===today)pick.setAttribute('aria-current','date');
       const angle=(index*360/7-90)*Math.PI/180;
       pick.style.setProperty('--day-x',(50+37*Math.cos(angle))+'%');
       pick.style.setProperty('--day-y',(50+37*Math.sin(angle))+'%');
-      node('span',new Intl.DateTimeFormat('de-DE',{weekday:'short'}).format(date),pick);
+      node('span',key===today?'Heute':new Intl.DateTimeFormat('de-DE',{weekday:'short'}).format(date),pick);
       node('strong',String(date.getDate()),pick);
       if(count){const badge=node('span',String(count),pick);badge.className='calendar-day-count';badge.setAttribute('aria-hidden','true');}
     }

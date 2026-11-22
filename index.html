@@ -545,7 +545,7 @@ main:has(.shopping-view)>#screen{display:flex;flex-direction:column;flex:1;min-h
 .shopping-view>.shopping-tiles>.shop-list{align-content:start}
 main:has(.shopping-view)>.app-version{flex:none;margin-top:8px;font-size:.7rem}
 .shopping-view>#shoppingConnection:not(:empty){font-size:.78rem;margin-bottom:4px}
-</style></head><body><main><header><h1>The 4 Werhans</h1></header><section id="screen"></section><footer class="app-version"><small>V73 · Lokale Daten und Kalenderabgleich</small></footer><button class="new" id="add">＋ Neu</button></main>
+</style></head><body><main><header><h1>The 4 Werhans</h1></header><section id="screen"></section><footer class="app-version"><small>V74 · Lokale Daten und Kalenderabgleich</small></footer><button class="new" id="add">＋ Neu</button></main>
 <dialog id="dayDialog" aria-labelledby="dayTitle">
 <div class="day-dialog-header"><h2 id="dayTitle"></h2><button type="button" id="closeDay" autofocus>Schließen</button></div>
 <div id="dayEvents" class="task-group"></div>
@@ -1796,8 +1796,17 @@ function calendarDayLabel(day,today){
   const label=new Intl.DateTimeFormat('de-DE',{weekday:'long',day:'numeric',month:'long'}).format(new Date(day+'T12:00:00'));
   return (day===today?'Heute · ':'')+label;
 }
+function calendarCircleEventVisible(item,now){
+  // Ganztägige Termine bleiben bis zum Tagesende sichtbar.
+  const endDay=item.dayforce&&item.endDay?item.endDay:item.day;
+  const endClock=item.dayforce&&item.endClock?item.endClock:item.clock;
+  if(!endClock)return endDay>=localDay(now);
+  const timestamp=new Date(endDay+'T'+endClock);
+  return Number.isFinite(timestamp.getTime())&&timestamp>=now;
+}
 function renderCalendar(area){
-  const today=localDay(new Date());
+  const now=new Date();
+  const today=localDay(now);
   selectedDay ||= today;
   const [year,month,day]=selectedDay.split('-').map(Number);
   const first=new Date(year,month-1,1);
@@ -1867,7 +1876,7 @@ function renderCalendar(area){
     for(let index=0;index<7;index++){
       const date=new Date(monday.getFullYear(),monday.getMonth(),monday.getDate()+index);
       const key=localDay(date);
-      const count=byDay.get(key)?.length||0;
+      const count=(byDay.get(key)||[]).filter(item=>calendarCircleEventVisible(item,now)).length;
       const fullDate=new Intl.DateTimeFormat('de-DE',{weekday:'long',day:'numeric',month:'long'}).format(date);
       const pick=button('',()=>{selectedDay=key;calendarMode='Tag';render()},ring);
       pick.className='calendar-circle-day';

@@ -545,7 +545,20 @@ main:has(.shopping-view)>#screen{display:flex;flex-direction:column;flex:1;min-h
 .shopping-view>.shopping-tiles>.shop-list{align-content:start}
 main:has(.shopping-view)>.app-version{flex:none;margin-top:8px;font-size:.7rem}
 .shopping-view>#shoppingConnection:not(:empty){font-size:.78rem;margin-bottom:4px}
-</style></head><body><main><header><h1>The 4 Werhans</h1></header><section id="screen"></section><footer class="app-version"><small>V74 · Lokale Daten und Kalenderabgleich</small></footer><button class="new" id="add">＋ Neu</button></main>
+
+/* Kurze Tagesvorschau im Wochenkreis. */
+.circle-calendar .calendar-circle-center{width:54%;gap:4px}
+.circle-calendar .calendar-circle-center>span{font-size:.8rem}
+.calendar-circle-preview{display:grid;gap:7px;margin-top:7px;text-align:left;min-width:0}
+.calendar-circle-preview:empty{display:none}
+.calendar-circle-preview-row{display:flex;align-items:baseline;gap:5px;min-width:0;font-size:clamp(.65rem,2.8vw,.9rem);line-height:1.25}
+.calendar-circle-preview-row[hidden]{display:none}
+.calendar-circle-preview-time{flex:none;font-variant-numeric:tabular-nums;font-weight:650}
+.calendar-circle-preview-title{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+#deleteEvent{color:#a02727;border-color:#d9aaaa}
+#editor .bar{flex-wrap:wrap}
+</style></head><body><main><header><h1>The 4 Werhans</h1></header><section id="screen"></section><footer class="app-version"><small>V76 · Lokale Daten und Kalenderabgleich</small></footer><button class="new" id="add">＋ Neu</button></main>
 <dialog id="dayDialog" aria-labelledby="dayTitle">
 <div class="day-dialog-header"><h2 id="dayTitle"></h2><button type="button" id="closeDay" autofocus>Schließen</button></div>
 <div id="dayEvents" class="task-group"></div>
@@ -560,7 +573,7 @@ main:has(.shopping-view)>.app-version{flex:none;margin-top:8px;font-size:.7rem}
 <label>Erinnerung<select id="reminder"><option value="">Keine</option><option value="5">5 Minuten vorher</option><option value="15">15 Minuten vorher</option><option value="30">30 Minuten vorher</option><option value="60">1 Stunde vorher</option><option value="120">2 Stunden vorher</option><option value="1440">1 Tag vorher</option><option value="2880">2 Tage vorher</option><option value="custom">Eigene Vorlaufzeit</option></select></label>
 <label id="calendarScopeLabel">Wer soll den Termin sehen?<select id="calendarScope"><option value="private">Nur auf diesem Gerät</option><option value="family">Ganze Familie</option><option value="couple">Matze &amp; Sindy</option></select><small>„Nur auf diesem Gerät“ bleibt lokal. Die gemeinsamen Kalender werden synchronisiert.</small></label><div id="customReminder" hidden><label>Vorlauf<input id="reminderAmount" type="number" min="1" max="99999" step="1" inputmode="numeric" value="1"></label><label>Einheit<select id="reminderUnit"><option value="1">Minuten</option><option value="60">Stunden</option><option value="1440">Tage</option></select></label></div>
 <small>Push für gemeinsame Kalender unter Einstellungen → Kalender-Erinnerungen aktivieren. Für „Nur auf diesem Gerät“ gibt es keine Push-Erinnerung. Ganztägig: Bezugszeit 09:00 Uhr.</small>
-</section><div class="bar"><button type="button" id="cancel">Abbrechen</button><button class="primary">Speichern</button></div></form></dialog>
+</section><div class="bar"><button type="button" id="deleteEvent" hidden>Termin löschen</button><button type="button" id="cancel">Abbrechen</button><button class="primary">Speichern</button></div></form></dialog>
 <button id="frame" hidden aria-label="Zur Profilauswahl"><img id="slide" alt=""></button>
 <script>
 const names=['Matze','Sindy','Philipp','Robin'], colors=['#bedbff','#f7c8b9','#f6dc91','#c7e5b7'];
@@ -1774,7 +1787,7 @@ el('newDayEvent').onclick=()=>openEditor(null,true);
 dayDialog.addEventListener('close',()=>{
   screen.querySelector('.month-day[aria-pressed="true"]')?.focus({preventScroll:true});
 });
-function fitCalendarView(){
+function fitCalendarGeometry(){
   if(!window.matchMedia('(max-width:699px)').matches)return;
   const area=screen.querySelector('.calendar-view');
   const ring=area?.querySelector('.calendar-circle');
@@ -1792,6 +1805,19 @@ function fitCalendarView(){
     if(overflow>1)ring.style.width=Math.max(146,size-overflow-2)+'px';
   }
 }
+function fitCalendarView(){
+  fitCalendarGeometry();
+  const ring=screen.querySelector('.calendar-circle');
+  const preview=ring?.querySelector('.calendar-circle-preview');
+  if(!preview?.children.length)return;
+  const center=preview.parentElement;
+  const first=preview.children[0];
+  const rowHeight=first.getBoundingClientRect().height||18;
+  const headerHeight=Array.from(center.children).filter(child=>child!==preview)
+    .reduce((sum,child)=>sum+child.getBoundingClientRect().height+4,0);
+  const capacity=Math.max(4,Math.floor((ring.getBoundingClientRect().height*.5-headerHeight-7)/(rowHeight+7)));
+  Array.from(preview.children).forEach((row,index)=>{row.hidden=index>=capacity});
+}
 function calendarDayLabel(day,today){
   const label=new Intl.DateTimeFormat('de-DE',{weekday:'long',day:'numeric',month:'long'}).format(new Date(day+'T12:00:00'));
   return (day===today?'Heute · ':'')+label;
@@ -1803,6 +1829,10 @@ function calendarCircleEventVisible(item,now){
   if(!endClock)return endDay>=localDay(now);
   const timestamp=new Date(endDay+'T'+endClock);
   return Number.isFinite(timestamp.getTime())&&timestamp>=now;
+}
+function calendarCirclePreview(items,now){
+  return items.filter(item=>calendarCircleEventVisible(item,now))
+    .slice().sort((a,b)=>(a.clock||'').localeCompare(b.clock||''));
 }
 function renderCalendar(area){
   const now=new Date();
@@ -1873,6 +1903,13 @@ function renderCalendar(area){
     const selectedDate=new Date(selectedDay+'T12:00:00');
     node('strong',new Intl.DateTimeFormat('de-DE',{weekday:'long'}).format(selectedDate),center);
     node('span',new Intl.DateTimeFormat('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'}).format(selectedDate),center);
+    const preview=node('div','',center);preview.className='calendar-circle-preview';
+    for(const item of calendarCirclePreview(byDay.get(selectedDay)||[],now)){
+      const row=node('div','',preview);row.className='calendar-circle-preview-row';row.hidden=preview.children.length>4;
+      node('span',item.clock||'Ganztägig',row).className='calendar-circle-preview-time';
+      const title=node('span',item.title,row);title.className='calendar-circle-preview-title';
+      row.title=(item.clock||'Ganztägig')+' '+item.title;
+    }
     for(let index=0;index<7;index++){
       const date=new Date(monday.getFullYear(),monday.getMonth(),monday.getDate()+index);
       const key=localDay(date);
@@ -2071,6 +2108,7 @@ function arrangeCalendarForm(){
 function openEditor(item=null,quickEvent=false){
   quickEventEntry=quickEvent;
   editingEvent=item;
+  el('deleteEvent').hidden=!item||Boolean(item.dayforce);
   el('form').reset();
   el('planToday').checked=taskFilter==='Heute'&&(view==='all'||names.includes(view));
   el('editorTitle').textContent=item?'Termin bearbeiten':'Neuer Eintrag';
@@ -2103,6 +2141,33 @@ function openEditor(item=null,quickEvent=false){
   arrangeCalendarForm();
   editor.showModal();
 }
+async function deleteCalendarEvent(){
+  const item=editingEvent;
+  const submit=el('form').querySelector('.primary');
+  const remove=el('deleteEvent');
+  if(!item||item.dayforce||submit.disabled||remove.disabled)return;
+  const shared=Boolean(item.revision)&&syncScopes.includes(item.calendarScope);
+  if(!confirm('„'+item.title+'“ wirklich löschen?'+(shared?' Dieser Termin wird für alle Geräte aus dem gemeinsamen Kalender gelöscht.':'')))return;
+  submit.disabled=remove.disabled=el('cancel').disabled=true;
+  try{
+    if(shared){
+      await sharedRequest(item.calendarScope,'DELETE',item.id,{revision:item.revision});
+      ++refreshGeneration;
+      sharedItems[item.calendarScope]=sharedItems[item.calendarScope].filter(entry=>entry.id!==item.id);
+    }else{
+      state.items=state.items.filter(entry=>entry!==item);
+      save();
+    }
+    undo=null;
+    editor.close();
+    render();
+  }catch(error){
+    alert('Der Termin wurde nicht gelöscht. '+error.message);
+  }finally{
+    submit.disabled=remove.disabled=el('cancel').disabled=false;
+  }
+}
+el('deleteEvent').onclick=deleteCalendarEvent;
 el('add').onclick=()=>openEditor();
 el('cancel').onclick=()=>editor.close();
 editor.onclose=reset;

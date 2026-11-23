@@ -405,8 +405,8 @@ body[data-custom-background]::before{
 .calendar-circle-day{position:absolute;left:var(--day-x);top:var(--day-y);transform:translate(-50%,-50%);width:clamp(44px,14vw,64px);height:clamp(44px,14vw,64px);min-height:44px;border-radius:50%;padding:4px;display:grid;align-content:center;justify-items:center;gap:0;background:#eaf0ff;border:2px solid #c4d0e9;line-height:1.15}
 .calendar-circle-day>span:first-child{font-size:.75rem}
 .calendar-circle-day>strong{font-size:1.1rem}
-.calendar-circle-day[aria-current=date]{border-color:var(--accent)}
-.calendar-circle-day[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:white}
+.calendar-circle-day[aria-pressed=true]{border-color:var(--accent)}
+.calendar-circle-day[aria-current=date]{background:var(--accent);border-color:var(--accent);color:white}
 .calendar-circle-day:active{transform:translate(-50%,-50%)}
 .calendar-day-count{position:absolute;top:-6px;right:-6px;display:grid;place-items:center;min-width:23px;height:23px;padding:0 4px;border-radius:999px;border:2px solid white;background:#174d55;color:white;font-size:.75rem;font-weight:750}
 .calendar-circle-day:focus-visible{outline-offset:4px}
@@ -549,16 +549,16 @@ main:has(.shopping-view)>.app-version{flex:none;margin-top:8px;font-size:.7rem}
 /* Kurze Tagesvorschau im Wochenkreis. */
 .circle-calendar .calendar-circle-center{width:54%;gap:4px}
 .circle-calendar .calendar-circle-center>span{font-size:.8rem}
-.calendar-circle-preview{display:grid;gap:7px;margin-top:7px;text-align:left;min-width:0}
+.calendar-circle-preview{display:grid;gap:7px;margin-top:7px;text-align:center;min-width:0}
 .calendar-circle-preview:empty{display:none}
-.calendar-circle-preview-row{display:flex;align-items:baseline;gap:5px;min-width:0;font-size:clamp(.65rem,2.8vw,.9rem);line-height:1.25}
+.calendar-circle-preview-row{display:flex;justify-content:center;align-items:baseline;gap:5px;min-width:0;font-size:clamp(.65rem,2.8vw,.9rem);line-height:1.25}
 .calendar-circle-preview-row[hidden]{display:none}
 .calendar-circle-preview-time{flex:none;font-variant-numeric:tabular-nums;font-weight:650}
 .calendar-circle-preview-title{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 #deleteEvent{color:#a02727;border-color:#d9aaaa}
 #editor .bar{flex-wrap:wrap}
-</style></head><body><main><header><h1>The 4 Werhans</h1></header><section id="screen"></section><footer class="app-version"><small>V76 · Lokale Daten und Kalenderabgleich</small></footer><button class="new" id="add">＋ Neu</button></main>
+</style></head><body><main><header><h1>The 4 Werhans</h1></header><section id="screen"></section><footer class="app-version"><small>V77 · Lokale Daten und Kalenderabgleich</small></footer><button class="new" id="add">＋ Neu</button></main>
 <dialog id="dayDialog" aria-labelledby="dayTitle">
 <div class="day-dialog-header"><h2 id="dayTitle"></h2><button type="button" id="closeDay" autofocus>Schließen</button></div>
 <div id="dayEvents" class="task-group"></div>
@@ -1902,7 +1902,6 @@ function renderCalendar(area){
     center.setAttribute('aria-live','polite');
     const selectedDate=new Date(selectedDay+'T12:00:00');
     node('strong',new Intl.DateTimeFormat('de-DE',{weekday:'long'}).format(selectedDate),center);
-    node('span',new Intl.DateTimeFormat('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'}).format(selectedDate),center);
     const preview=node('div','',center);preview.className='calendar-circle-preview';
     for(const item of calendarCirclePreview(byDay.get(selectedDay)||[],now)){
       const row=node('div','',preview);row.className='calendar-circle-preview-row';row.hidden=preview.children.length>4;

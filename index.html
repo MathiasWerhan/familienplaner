@@ -592,7 +592,31 @@ main:has(.task-view)>#screen{display:flex;flex-direction:column;flex:1;min-heigh
 .task-view .task-select-more{margin-top:4px}
 .task-view .task-sync-status{margin:6px 0;font-size:.68rem}
 main:has(.task-view)>.app-version{flex:none;margin-top:4px;font-size:.65rem}
-</style></head><body><main><header><h1>The 4 Werhans</h1></header><section id="screen"></section><footer class="app-version"><small>V79 · Lokale Daten und Kalenderabgleich</small></footer><button class="new" id="add">＋ Neu</button></main>
+
+/* Eine Aufgabenansicht ohne Seitenwechsel; Platz gehört den Aufgaben. */
+main:has(.task-view)>header,main:has(.task-view)>.app-version{display:none}
+main:has(.task-view){padding-bottom:calc(62px + env(safe-area-inset-bottom,0px))}
+#screen:has(.task-view)>.back{font-size:.85rem;margin:4px 0 10px;min-height:32px}
+.task-view>.list-head{margin-bottom:4px}
+.task-view>.list-head h2{font-size:1.4rem;margin:0}
+.task-view .task-filters{margin:6px 0}
+.task-view .task-filters button{min-height:38px;padding:7px 8px}
+.task-view .fitted-tasks{display:grid;grid-template-columns:repeat(var(--task-columns,1),minmax(0,1fr));grid-auto-rows:var(--task-height);align-content:start;margin:6px 0}
+.task-view .task-row{border-radius:10px}
+.task-view .task-select-more{align-self:flex-start;width:auto;min-height:32px;font-size:.78rem;padding:4px 8px;margin:3px 0}
+.task-view .task-pages[hidden]{display:none}
+.task-view .task-pages{height:32px;min-height:32px}
+.task-view .task-pages button{min-height:30px}
+.task-view .task-menu{height:100%;min-height:0;min-width:32px;width:32px;font-size:1.2rem}
+.task-view .fitted-tasks .task-toggle{padding:5px 10px;gap:8px;font-size:.93rem}
+.task-view .dense-tasks .task-toggle{font-size:.8rem;padding:3px 7px;gap:6px}
+.task-view .dense-tasks .task-check{width:20px;height:20px;flex-basis:20px;border-radius:5px}
+.task-view .dense-tasks .task-toggle small{display:none}
+.task-view .very-dense-tasks .task-toggle{font-size:.72rem}
+.task-view .very-dense-tasks .task-toggle strong{-webkit-line-clamp:1}
+.task-view .very-dense-tasks .task-check{width:16px;height:16px;flex-basis:16px}
+main:has(.task-view)>.new{min-height:42px;font-size:1rem;padding:9px 18px;bottom:calc(10px + env(safe-area-inset-bottom,0px))}
+</style></head><body><main><header><h1>The 4 Werhans</h1></header><section id="screen"></section><footer class="app-version"><small>V80 · Lokale Daten und Kalenderabgleich</small></footer><button class="new" id="add">＋ Neu</button></main>
 <dialog id="dayDialog" aria-labelledby="dayTitle">
 <div class="day-dialog-header"><h2 id="dayTitle"></h2><button type="button" id="closeDay" autofocus>Schließen</button></div>
 <div id="dayEvents" class="task-group"></div>
@@ -702,13 +726,13 @@ function showFeedback(message){
   clearTimeout(showFeedback.timer);
   showFeedback.timer=setTimeout(()=>{status.hidden=true},5000);
 }
-function taskLayout(count,height,page){
-  const capacity=Math.max(1,Math.floor((height+8)/64));
-  const pages=Math.max(1,Math.ceil(count/capacity));
-  page=Math.min(page,pages-1);
-  const shown=Math.min(capacity,Math.max(0,count-page*capacity));
-  const rowHeight=Math.min(104,Math.max(44,Math.floor((height-8*Math.max(0,shown-1))/Math.max(1,shown))));
-  return {capacity,pages,page,rowHeight};
+function taskLayout(count,height){
+  // Alle Aufgaben bleiben auf einer Ansicht; bei hoher Dichte zwei Spalten.
+  const columns=count>Math.max(10,Math.floor((height+6)/42))?2:1;
+  const rows=Math.max(1,Math.ceil(count/columns));
+  const gap=count>10?4:6;
+  const rowHeight=Math.min(88,Math.max(1,Math.floor((height-gap*(rows-1))/rows)));
+  return {columns,rowHeight,gap};
 }
 function openTaskActions(item){
   const planned=item.plannedDay&&item.plannedDay<=localDay(new Date());
@@ -870,21 +894,20 @@ for(const [key,label] of [['wait','Start nach Sekunden (0 = aus)'],['interval','
   taskViewportWidth=document.documentElement.clientWidth;
   const height=taskViewportHeight=Math.round(window.visualViewport?.height||window.innerHeight);
   if(taskFilter==='Heute')button('+ Für heute auswählen',()=>{taskFilter='Alle Aufgaben';taskPage=0;render()},area).className='task-select-more';
-  if(taskSyncMessage){const status=node('small',taskSyncMessage,area);status.className='task-sync-status';status.setAttribute('role','status');}
+  if(taskSyncMessage&&taskSyncMessage!=='Aufgaben abgeglichen.'){const status=node('small',taskSyncMessage,area);status.className='task-sync-status';status.setAttribute('role','status');}
   const controls=node('div','',area);controls.className='bar task-pages';
+  controls.hidden=!undo;
   function drawTasks(){
     if(!list.isConnected)return;
-    const layout=taskLayout(tasks.length,list.clientHeight,taskPage);
-    taskPage=layout.page;
+    const layout=taskLayout(tasks.length,list.clientHeight);
     list.replaceChildren();controls.replaceChildren();
     list.style.setProperty('--task-height',layout.rowHeight+'px');
-    for(const item of tasks.slice(taskPage*layout.capacity,(taskPage+1)*layout.capacity))taskRow(item,list);
+    list.style.setProperty('--task-columns',layout.columns);
+    list.style.gap=layout.gap+'px';
+    list.classList.toggle('dense-tasks',layout.rowHeight<58||layout.columns>1);
+    list.classList.toggle('very-dense-tasks',layout.rowHeight<40);
+    for(const item of tasks)taskRow(item,list);
     if(!tasks.length)node('p',taskFilter==='Heute'?'Für heute ist noch nichts ausgewählt.':taskFilter==='Erledigt'?'Noch keine erledigten Aufgaben.':'Keine offenen Aufgaben.',list).className='empty';
-    if(layout.pages>1){
-      const prev=button('‹',()=>{taskPage--;drawTasks()},controls);prev.disabled=taskPage===0;prev.setAttribute('aria-label','Vorherige Aufgabenseite');
-      node('span',(taskPage+1)+' / '+layout.pages,controls);
-      const next=button('›',()=>{taskPage++;drawTasks()},controls);next.disabled=taskPage===layout.pages-1;next.setAttribute('aria-label','Nächste Aufgabenseite');
-    }
     if(undo){const back=button('↶',()=>{undo.item.status=undo.status;undo=null;save();render()},controls);back.setAttribute('aria-label','Letzte Änderung rückgängig');back.title='Letzte Änderung rückgängig';}
   }
   requestAnimationFrame(drawTasks);
